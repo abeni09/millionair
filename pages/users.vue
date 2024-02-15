@@ -94,10 +94,10 @@
                           :rules="[rules.required]"
                           outlined
                           dense
-                          v-model="newUser.supervisor"
+                          v-model="newUser.pot"
                           label="Supervisor"
                           required
-                          :items="supervisorOptions"
+                          :items="potOptions"
                           ></v-select>                  -->
                   </v-form>
               </v-card-text>
@@ -167,7 +167,7 @@ export default {
       // this.fetchUser()
       const database = firebase.database();
       const UserRef = database.ref('Users');
-      const supervisorsRef = database.ref('Supervisors');
+      const potsRef = database.ref('Supervisors');
 
       UserRef
       // .orderByChild('status').equalTo('Open')
@@ -219,7 +219,7 @@ export default {
           User: [],
           search: "",
           filteredUser: [], // Filtered User based on search
-          supervisorOptions: [],
+          potOptions: [],
           roleOptions: ["Admin", "Agent", "Banker"],
           database: firebase.database(),
           headers: [

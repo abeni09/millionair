@@ -177,7 +177,7 @@
         <v-dialog v-model="displayInfoDialog" v-if="selectedMember" max-width="80%" persistent>
             <v-card>
             <v-card-title class="headline">
-                Member Information
+                Member Information <v-icon v-if = "selectedMember['won']" color="green" >mdi-check-decagram</v-icon>
             </v-card-title>
 
             <v-card-text>
@@ -272,7 +272,7 @@ export default {
         const datePath = this.formatDate(Date.now()).toString().replace(',', '').replace(' ','')
         const database = firebase.database();
         const UserRef = database.ref('Members/');
-        const supervisorsRef = database.ref('Users/');
+        const potsRef = database.ref('Users/');
         const siteSettingsRef = database.ref('Settings/SiteSetting');
         const lottoSettingsRef = database.ref('Settings/LottoSetting');
         const lottoNumbersRef = database.ref('LottoNumber')
@@ -374,7 +374,7 @@ export default {
                         }
                         else if (this.userHasPermission) {
                             // alert(this.userRole)
-                            // if (User.supervisorID == this.currentUser.uid) {
+                            // if (User.potID == this.currentUser.uid) {
                                 // console.log(User);
                                 this.User.push(User);
                             // }
@@ -494,6 +494,9 @@ export default {
             selectedCode: null,
             selectedMember: null,
             memberFields: {
+                won: 'Won',
+                // winAmount: 'Win Amount',
+                // winDate: 'Win Date',
                 pot: 'Pot',
                 name: 'Name',
                 email: 'Email',

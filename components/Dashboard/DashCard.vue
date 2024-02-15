@@ -1,24 +1,24 @@
 <template>
     <v-card
-      class="ma-1 lighten-1 white--text"
+      style="color: rgb(251, 197, 43);"
+      class="equal-card pa-5"
       flat
       :color="dcolor"
-      width="210"
-      min-height="90"
     >
       <v-row>
-        <v-col class="align-center" cols = 12>
-          <v-row>
-            <v-col align = "center" cols = 12><v-icon size="30"> {{ iconStyle }} </v-icon></v-col>
-            <v-col align = "center" cols = 12>{{ title }}</v-col>
-          </v-row>
-        </v-col>
-        <v-col cols = '12' :color="dcolor" style="list-style: none; font-weight: bolder; font-size:25px;">
+        <v-spacer/>
+        <v-row align="center">
+          
+          <v-col align = "center" cols = 12><v-icon size="60" color="white"> {{ iconStyle }} </v-icon></v-col>
+        </v-row>
+        <v-row align="center">
+        <v-col cols = '12' style="list-style: none; font-weight: bolder; font-size:30px;">
           {{ countItems }}
         </v-col>
-        <!-- <v-col cols = '12' :color="dcolor" style="list-style: none; font-weight: bolder; font-size:25px;">
-          {{ percentage + '%' }}
-        </v-col> -->
+            <v-col cols = 12>{{ title }}</v-col>
+
+        </v-row>
+        <v-spacer/>
       </v-row>
     </v-card>
   </template>
@@ -43,10 +43,15 @@
       //   default: 0,
       // },
       iconStyle: {
-        // required: true,
+        required: true,
         default: 'mdi-account',
       },
     },
   }
   </script>
-  
+  <style scoped>
+  .equal-card {
+    width: 200px; /* Adjust the width as per your requirement */
+    /* height: 100%; Adjust the height as per your requirement */
+  }
+  </style>

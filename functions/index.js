@@ -197,7 +197,7 @@ app.post('/update-lotto-setting', async (req, res) => {
             const lottoNumber  = currRollNumber.toString().padStart(9, '0'); 
             await updateRollAndLottoNumber(firstTime,currRollNumber,lottoNumber, selectedMember.pot, formattedDate, amount, dailyContribution, selectedMember, currentUser)
         }
-        updateDailyContribution(selectedMember.id,formattedDate,dailyContribution,selectedMember.pot)
+        updateDailyContribution(winner,selectedMember.id,formattedDate,dailyContribution,selectedMember.pot)
     }
     await updateDeposit(amount, selectedMember.id, formatDateNow(0))
   if (winner) {
@@ -719,7 +719,7 @@ async function updateLastDate(firstTime, memberId, formattedDate) {
 }
 async function updateServiceFee(memberId, formattedDate, ServiceFee, pot) {
     const memberRef = admin.database().ref(`ServiceFee/${pot}${formattedDate}/${memberId}`);
-    await memberRef.set({ amount: ServiceFee }, ()=>{
+    await memberRef.push({ amount: ServiceFee }, ()=>{
         console.log(`Service fee (${ServiceFee}) updated for member ${memberId}: ${formattedDate}`);
         return true
     });
@@ -727,15 +727,19 @@ async function updateServiceFee(memberId, formattedDate, ServiceFee, pot) {
 }
 async function updatePenalityFee(memberId, formattedDate, PenalityFee, penalityAmount, pot) {
     const memberRef = admin.database().ref(`PenalityFee/${pot}${formattedDate}/${memberId}`);
-    await memberRef.set({ amount: penalityAmount, days: penalityAmount/PenalityFee }, ()=>{
+    await memberRef.push({ amount: penalityAmount, days: penalityAmount/PenalityFee }, ()=>{
         console.log(`Penality fee (${PenalityFee}) updated for member ${memberId}: ${formattedDate}`);
         return true
     });
 
 }
-async function updateDailyContribution(memberId, formattedDate, DailyContribution, pot) {
+async function updateDailyContribution(winner, memberId, formattedDate, DailyContribution, pot) {
     const memberRef = admin.database().ref(`DailyContribution/${pot}/${formattedDate}/${memberId}`);
-    await memberRef.set({ amount: DailyContribution }, ()=>{
+    var status = 'Before'
+    if (winner) {
+        status = 'After'
+    }
+    await memberRef.push({ amount: DailyContribution, status: status}, ()=>{
         console.log(`Daily contribution (${DailyContribution}) updated for member ${memberId}: ${formattedDate}`);
         return true
     });
@@ -772,7 +776,7 @@ async function setWinner(winnerMember, drawPath, drawnBy) {
     } else {
         await winnerRef.set({ winnerMember },()=>{
             refRef.set({winnerMember},()=>{
-                winnerMemberRef.update({"won":true, "winAmount":WIN_AMOUNT, 'winDate': Date.now()},()=>{
+                winnerMemberRef.update({"won":true, "winAmount":WIN_AMOUNT, 'winDate': Date.now(), 'winnerNumber':winnerMember.currentLottoNumber},()=>{
 
                     console.log(`Winner updated at: ${updatedDrawPath}`);
                 })

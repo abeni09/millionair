@@ -45,11 +45,15 @@
       </v-navigation-drawer>
       <v-app-bar :clipped-left="clipped" fixed app>
         <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-        <v-btn icon @click.stop="miniVariant = !miniVariant">
+        <!-- <v-btn icon @click.stop="miniVariant = !miniVariant">
           <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-        </v-btn>
-        <v-toolbar-title v-text="htitle" />
+        </v-btn> -->
+        <!-- <v-toolbar-title v-text="htitle" /> -->
         <v-spacer />
+        
+      <v-card-subtitle class="centered-title">
+        Logged in as {{ currentUser.email }}
+      </v-card-subtitle>
         <div :dark="setTheme">
           <v-switch :label="`Dark`" v-model="goDark"></v-switch>
         </div>
