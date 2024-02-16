@@ -77,22 +77,22 @@ app.post('/start-draw', async (req, res) => {
   }
 });
 
-app.post('/update-deposit', async (req, res) => {
-    try {
-      const { amount, selectedMember, formattedDate } = req.body;
+// app.post('/update-deposit', async (req, res) => {
+//     try {
+//       const { amount, selectedMember, formattedDate } = req.body;
   
-      if (!selectedMember || !formattedDate|| !amount) {
-        return res.status(400).json({ success: false, message: 'Invalid request body.' });
-      }
+//       if (!selectedMember || !formattedDate|| !amount) {
+//         return res.status(400).json({ success: false, message: 'Invalid request body.' });
+//       }
   
-      await updateDeposit(amount, selectedMember, formattedDate);
+//       await updateDeposit(amount, selectedMember, formattedDate);
   
-      res.status(200).json({ success: true, message: 'Deposit updated successfully.' });
-    } catch (error) {
-      console.error('Error updating deposit:', error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
-    }
-});
+//       res.status(200).json({ success: true, message: 'Deposit updated successfully.' });
+//     } catch (error) {
+//       console.error('Error updating deposit:', error);
+//       res.status(500).json({ success: false, message: 'Internal Server Error' });
+//     }
+// });
 app.post('/set-winner', async (req, res) => {
     try {
       const { winnerMember, drawPath, drawnBy } = req.body;
@@ -199,7 +199,7 @@ app.post('/update-lotto-setting', async (req, res) => {
         }
         updateDailyContribution(winner,selectedMember.id,formattedDate,dailyContribution,selectedMember.pot)
     }
-    await updateDeposit(amount, selectedMember.id, formatDateNow(0))
+    await updateDeposit(winner, amount, selectedMember.id, formatDateNow(0))
   if (winner) {
     
     res.status(200).json({ success: true, message: `${totalLottoTogenerate} days of payment covered for: ${selectedMember.name}` });
@@ -707,7 +707,7 @@ async function selectRandomMember(potNumber) {
 
 async function updateLastDate(firstTime, memberId, formattedDate) {
     const memberRef = admin.database().ref(`Members/${memberId}`);
-    const todaysDate = null
+    var todaysDate = null
     if (firstTime) {
         todaysDate = Date.now();
     }
@@ -745,9 +745,13 @@ async function updateDailyContribution(winner, memberId, formattedDate, DailyCon
     });
 
 }
-async function updateDeposit(amount, memberId, formattedDate) {
+async function updateDeposit(winner, amount, memberId, formattedDate) {
+    var status = 'Before'
+    if (winner) {
+        status = 'After'
+    }
     const memberRef = admin.database().ref(`Members/${memberId}/Deposit`);
-    await memberRef.push({ depositedAt: formattedDate, amount:amount });
+    await memberRef.push({ depositedAt: formattedDate, amount:amount, status: status});
 
     console.log(`Deposit updated for member ${memberId}: ${formattedDate}`);
 }

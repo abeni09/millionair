@@ -284,30 +284,14 @@ export default {
                     // snapshot.forEach((child)=>{
                     //     this.settings.push(child.toJSON())
                         this.editedItem = snapshot.val()
-                        this.loading = false
                         // console.log(this.editedItem)
                     // })
                 }
+                else{
+                    this.editedItem.systemStartedAt = Date.now();
+                }
                 })
-        // firebase.database()
-        //     .ref('allLottoNumbers')
-        //     .once('value', (snapshot) =>{
-        //         if(snapshot.exists()){
-        //             snapshot.forEach((child)=>{
-        //                 console.log(child.toJSON())
-        //                 // firebase.database().ref('allLottoNumbers').child(child.key).remove()
-        //             })
-                    
-        //         }
-        //         else{
-        //             console.log('no data at this path');
-        //         }
-        //     })
-    //   }
-    //   else {
-    //       console.log("Unauthorized access!!")
-    //       this.userIsAdmin = false
-    //   }
+        this.loading = false
 
   },
   methods:{
@@ -505,6 +489,7 @@ export default {
      settings: [],
 
     editedItem: {
+        systemStartedAt: null,
         drawStarted: false,
         sn: 'Millionair',
         pot: 10,

@@ -1,56 +1,29 @@
 <template>
   <v-container>
     <!-- Dialog for adding User -->
-    <v-dialog v-model="viewGeneratedReport" max-width="600px" persistent>
-      <v-card>
+    <v-dialog v-if="selectedMember != null" v-model="viewGeneratedReport" max-width="100%" persistent>
+      <v-card >
         <v-row class = 'ma-1' style="background-color: aliceblue; margin-bottom: 1%;">
           <v-card-title class="headline centered-title">
-            {{duration}} Generated Report for {{ pot }} {{ member }} {{ company }} {{  '(' + today + ')' }}
+            Report for {{ member }} ({{ pot }})
           </v-card-title>
         </v-row>
         <v-card-text>
-          <v-row align="center" v-if="specificReportResponse.length == 0">
-            <v-card-title>No result found</v-card-title>
-          </v-row>
-          <v-row align="center" v-else-if="specificReportResponse.length != 0">
-            <v-card-title class="headline centered-title">
-              Status: <span :style="{ color: getStatusColor(status) }">{{ status }}</span>
-            </v-card-title>
-            <v-spacer/>
-            <v-btn v-if="userHasPermission && specificReportResponse" @click="exportToExcel(specificReportResponse)" color="primary">Export to Excel</v-btn>
-            <v-row class="ma-5">
-              <v-col align="center" cols = "6">
-                <div>
-                  <dash-card-for-report :percentage = "(specificRegistered/specificReport * 100).toFixed(2)" dcolor="green" title="Registered" :countItems="specificRegistered"
-                  />
-                </div>
-              </v-col>
-              <v-col align="center" cols = "6">
-                <div>
-                  <dash-card-for-report :percentage = "(specificPast/specificReport * 100).toFixed(2)" dcolor="grey" title="Past" :countItems="specificPast"
-                  />
-                </div>
-              </v-col>
-              <v-col align="center" cols = "6">
-                <div>
-                  <dash-card-for-report :percentage = "(specificShared/specificReport * 100).toFixed(2)" dcolor="red" title="Shared" :countItems="specificShared"
-                  />
-                </div>
-              </v-col>
-              <v-col align="center" cols = "6">
-                <div>
-                  <dash-card-for-report :percentage = "(specificNotRegistered/specificReport * 100).toFixed(2)" dcolor="red" title="Not Registered" :countItems="specificNotRegistered"
-                  />
-                </div>
-              </v-col>
-              <v-col align="center" cols = "6">
-                <div>
-                  <dash-card-for-report :percentage = "(specificOkStop/specificReport * 100).toFixed(2)" dcolor="red" title="Ok/Stop" :countItems="specificOkStop"
-                  />
-                </div>
-              </v-col>
-            </v-row>
+          <v-row align="center">
+            
+            <v-col align="center" v-for="(card, index) in specificMemberCards" :key="index" cols="12" md="4" sm = '6'>
+              
+              <div class="card">
+                  <div>
+                      <div class="numbers">{{ card.countItems }}</div>
+                      <div class="cardName">{{ card.title }}</div>
+                  </div>
 
+                  <!-- <div class="iconBx">
+                      <v-icon class="md hydrated">{{ card.icon }}</v-icon>
+                  </div> -->
+              </div>
+            </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions>
@@ -194,10 +167,23 @@ export default {
         { title: "How much money payed so far for those who got lucky?", icon:"mdi-account", countItems: this.winnerMembers.length * parseInt(this.siteSettings.dwa) },
         
       ];
+    },
+    specificMemberCards() {
+      const cards = [
+        { won:false, title: "How many days left until this individual gets lucky?", icon:"mdi-pot", countItems: (parseInt(this.siteSettings.dwa) - this.selectedMemberBeforeDeposit)/this.siteSettings.dcb},
+        { won:false, title: "How much money this individual must pay to get lucky?", icon:"mdi-pot", countItems: parseInt(this.siteSettings.dwa) - this.selectedMemberBeforeDeposit},
+        { won:true, title: "How many days has this individual been contributing before getting lucky?", icon:"mdi-pot", countItems: this.selectedMemberBeforeDeposit/this.siteSettings.dcb},
+        { won:true, title: "How much money has this individual contributed before getting lucky?", icon:"mdi-pot", countItems: this.selectedMemberBeforeDeposit},
+        { won:true, title: "How many days has this individual left to finish contributing after getting lucky?", icon:"mdi-pot", countItems: (parseInt(this.siteSettings.dwa) - this.selectedMemberTotalDeposit)/this.siteSettings.dca},
+        { won:true, title: "How much money is this individual left to finish contributing after getting lucky?", icon:"mdi-account", countItems: parseInt(this.siteSettings.dwa) - this.selectedMemberTotalDeposit },
+      ];
+      return cards.filter(card=> card.won == this.selectedMember.won)
     }
   },
   watch: {
     pot: 'fetchDataForSelectedPot',
+    member: 'fetchDataForSelectedMember',
+
   },
   components: { DashCard , DashCardForReport},
   name: 'IndexPage',
@@ -205,18 +191,7 @@ export default {
     return{
       totalMembers: 0,
       totalPots: 0,
-      totalRegistered: 0,
-      totalReport: 0,
-      totalNotRegistered: 0,
-      totalPast: 0,
-      totalOkStop: 0,
-      totalShared: 0,
-      specificReport: 0,
-      specificRegistered: 0,
-      specificNotRegistered: 0,
-      specificPast: 0,
-      specificOkStop: 0,
-      specificShared: 0,
+      // specificShared: 0,
       days: 0,
       potDataLoading: false,
       pot:null,
@@ -225,9 +200,15 @@ export default {
       duration: "Daily",
       today:null,
       status:null,
-      specificReportResponse:[],
+      winStatus:null,
+      specificReportResponse:null,
       potOptions:[],
       memberOptions:[],
+      selectedMember:null,
+      selectedMemberDeposit:[],
+      selectedMemberTotalDeposit:null,
+      selectedMemberBeforeDeposit:null,
+      selectedMemberAfterDeposit:null,
       originalMemberOptions:[],
       winnerMembers:[],
       stillToWinMembers:[],
@@ -270,8 +251,8 @@ export default {
             // alert(this.userHasPermission)
           } else {
             this.userHasPermission = false;
-            this.pot = sanitizedEmail
-            this.company = snapshot.val().company
+            // this.pot = sanitizedEmail
+            // this.company = snapshot.val().company
           }
         })
 
@@ -301,8 +282,6 @@ export default {
           console.log("Member fetched");
         })
       }
-      this.fetchReports()
-      // this.fetchCompanys()
       this.fetchSiteSettings()
       this.fetchLottoSettings()
       // this.fetchPots()
@@ -316,6 +295,41 @@ export default {
 
   },
   methods:{
+    fetchDataForSelectedMember(){
+      
+      if (this.originalMemberOptions.length != 0) {
+        this.selectedMember = this.originalMemberOptions.filter(newMember => newMember.id == this.member && newMember.pot == this.pot)[0]
+        console.log(this.selectedMember);
+        if (this.selectedMember != null) {
+          this.winStatus = this.selectedMember.won
+        
+          firebase.database().ref('Members').child(this.selectedMember.id).child('Deposit').once('value',snap=>{
+            if (snap.exists()) {
+              snap.forEach(deposit => {
+                const newDeposit = {
+                  status: deposit.val().status,
+                  amount: deposit.val().amount,
+                };
+                this.selectedMemberDeposit.push(newDeposit)
+
+              })
+              
+            }
+          })
+          if (this.selectedMemberDeposit.length != 0) {
+            this.selectedMemberDeposit.forEach(element => {
+              this.selectedMemberTotalDeposit = this.selectedMemberTotalDeposit + parseInt(element.amount)
+              if (element.status == 'Before') {
+                this.selectedMemberBeforeDeposit = this.selectedMemberBeforeDeposit + parseInt(element.amount)
+              }
+              if (element.status == 'After') {
+                this.selectedMemberAfterDeposit = this.selectedMemberAfterDeposit + parseInt(element.amount)
+              }
+            });            
+          }
+        }
+      }
+    },
     fetchDataForSelectedPot() {
       this.potDataLoading = true
       this.memberOptions = []
@@ -345,7 +359,7 @@ export default {
         
       }
       // Replace this with your actual logic
-      console.log(`Fetching data for pot: ${this.filteredDeposits[0].amount}`);
+      // console.log(`Fetching data for pot: ${this.filteredDeposits[0].amount}`);
       this.potDataLoading = false
       // console.log(this.memberOptions);
     },
@@ -354,24 +368,18 @@ export default {
     },
     closeReportViewer(){
       this.viewGeneratedReport = false
-      this.specificReportResponse = []
+      this.specificReportResponse = null
       if (this.userHasPermission) {
         this.pot = null
       }
       // this.pot = null
+      this.selectedMember = null
       this.member = null
       // this.duration = null
       this.generating = false
       this.days = 0
       this.today = null
       this.status = null
-      this.totalReport = 0
-      this.specificReport = 0
-      this.specificRegistered = 0
-      this.specificNotRegistered = 0
-      this.specificOkStop = 0
-      this.specificShared = 0
-      this.specificPast = 0
     },
     // fetchMemberUsingID(memberID){
     //   this.database.ref('Member').child(memberID).once('value',snapshot=>{
@@ -401,79 +409,10 @@ export default {
     },
     generateReport(){
       this.generating = true
-      this.specificReportResponse = []
-      // if (this.duration != null) {
-      switch (this.duration) {
-        case "Daily":
-          this.days = 1
-          break;
-
-        case "Weekly":
-          this.days = 7
-          break;
-
-        case "Monthly":
-          this.days = 30
-          break;
-
-        default:
-          this.days = 1
-          break;
-      }
-      const todaysDate = this.formatDate(Date.now())
-      this.today = todaysDate
-      // alert(today)
-      const currentUserEmail = this.currentUser.email;
-      const sanitizedEmail = currentUserEmail.replace('@', '').replace('.', '');
-      if (!this.userHasPermission) {
-        this.pot = sanitizedEmail
-      }
-      this.fetchSpecificReport(this.today, this.pot, this.member, this.company)
-      for (let index =1 ; index < this.days; index++) {
-        // alert(this.calculateDaysBefore(index))
-        this.fetchSpecificReport(this.calculateDaysBefore(index), this.pot, this.member, this.company)
-
-      }
-      console.log(this.specificReportResponse.length);
-      if (this.specificReportResponse.length != 0) {
-        const array = this.specificReportResponse
-        for (let index = 0; index < array.length; index++) {
-          const element = array[index];
-          // alert(element.status)
-          switch (element.status) {
-            case 'registered':
-              this.specificRegistered = this.specificRegistered + 1
-              this.specificReport = this.specificReport + 1
-              break;
-            case 'not registered':
-              this.specificReport = this.specificReport + 1
-              this.specificNotRegistered = this.specificNotRegistered + 1
-              break;
-            case 'past':
-              this.specificReport = this.specificReport + 1
-              this.specificPast = this.specificPast + 1
-              break;
-            case 'shared':
-              this.specificReport = this.specificReport + 1
-              this.specificShared = this.specificShared + 1
-              break;
-            case 'ok/stop':
-              this.specificReport = this.specificReport + 1
-              this.specificOkStop = this.specificOkStop + 1
-              break;
-
-            default:
-              break;
-          }
-
-        }
-      }
+   
       this.generating = false
       this.viewGeneratedReport = true
-      // } else {
-      //     this.generating = false
-
-      // }
+  
     },
     calculateDaysBefore(days){
       // Get the current date
@@ -492,20 +431,6 @@ export default {
       return format(new Date(timestamp), 'MMMddyyyy');
     },
 
-    fetchSpecificReport(datePath, pot, member, company){
-      this.database.ref('Report').once('value',snapshot=>{
-        snapshot.forEach(element => {
-          const elementVal = element.val();
-          // Check conditions only if pot and member are not null
-          if ((!pot || elementVal.pot.toLowerCase() == pot) &&
-            (!member || elementVal.Member == member) &&
-            (!company || elementVal.company == company) &&
-            elementVal.date == datePath) {
-            this.specificReportResponse.push(elementVal);
-          }
-        });
-      })
-    },
     fetchSiteSettings(){
       this.siteSettings = []
       this.database.ref('Settings/SiteSetting').once('value',snapshot=>{
@@ -535,38 +460,6 @@ export default {
       })
     },
 
-    fetchReports(){
-      this.database.ref('Report').on('value',snapshot=>{
-        this.totalRegistered = 0,
-          this.totalNotRegistered = 0,
-          this.totalPast = 0,
-          this.totalShared = 0,
-          this.totalOkStop = 0,
-          snapshot.forEach(element => {
-            if (element.val().status == "not registered") {
-              this.totalNotRegistered = this.totalNotRegistered + 1
-              this.totalReport = this.totalReport + 1
-            }
-            else if (element.val().status == "registered") {
-              this.totalReport = this.totalReport + 1
-              this.totalRegistered = this.totalRegistered + 1
-            }
-            else if (element.val().status == "past") {
-              this.totalReport = this.totalReport + 1
-              this.totalPast = this.totalPast + 1
-            }
-            else if (element.val().status == "shared") {
-              this.totalReport = this.totalReport + 1
-              this.totalShared = this.totalShared + 1
-            }
-            else if (element.val().status == "ok/stop") {
-              this.totalReport = this.totalReport + 1
-              this.totalOkStop = this.totalOkStop + 1
-            }
-          });
-        console.log("Report fetched");
-      })
-    },
     fetchPots(){
       // alert(this.numberOfPots)
       if (this.numberOfPots != 0) {
