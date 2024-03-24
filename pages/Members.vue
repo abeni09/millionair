@@ -30,6 +30,7 @@
                     label="Column"
                     />
                 </v-col>
+                
                 <v-col align = "center" 
                 cols="12"
                 md="6"
@@ -41,6 +42,8 @@
                 md="3"
                 sm="3">
                     <v-btn @click="showAddForm" style="background-color: #183D0E; color: #FFC72C;" v-if="userHasPermission">Add</v-btn>
+                    <!-- <v-btn @click="generateUsers" style="background-color: #183D0E; color: #FFC72C;" :disabled = "generating" v-if="!generating">Generate</v-btn>
+                    <v-btn @click="generateUsers" style="background-color: #183D0E; color: #FFC72C;" :disabled = "generating" v-else-if="generating">Generating</v-btn> -->
                 </v-col>
             </v-row>
             <!-- Add an "Add" button -->
@@ -49,7 +52,19 @@
             :headers="headers"
             :items="filteredUser"
             :search="search"
+            :footer-props="{
+            'items-per-page-options': [10, 20, 30],
+            'show-current-page': true,
+            'show-text': true,
+            'show-select': true,
+            'align': 'center'
+            }"
         >
+        <!-- <template v-slot:body.append>
+          <v-btn @click="loadNextPage" :loading="loadingMore" block>
+            Load More
+          </v-btn>
+        </template> -->
             <template v-slot:item.actions="{ item }">
                 <v-btn fab small inline class="ma-1"  v-if="userRole != null && userRole != 'Banker'" @click="editUser(item)">
                     <v-icon color="green" >mdi-pencil</v-icon>
@@ -73,7 +88,7 @@
         </v-data-table>
 
         <!-- Add an export button -->
-        <v-btn @click="exportToExcel" color="primary">Export to Excel</v-btn>
+        <v-btn :disabled = "loading" @click="exportToExcel" color="primary">Export to Excel</v-btn>
         
   
         <!-- Dialog for adding User -->
@@ -87,7 +102,7 @@
                     <!-- Personal Information -->
                     
                     <v-row>
-                        <v-select :rules="[rules.required]" outlined dense v-model="newUser.pot" label="Pot" :items="potOptions"></v-select>
+                        <v-select :rules="[rules.required]" outlined dense v-model="newUser.batch_number" label="Batch" :items="potOptions"></v-select>
                     </v-row>
                     <v-card-subtitle class="label text-grey-darken-2 bold-center">Personal</v-card-subtitle>
                     <v-row>
@@ -106,13 +121,38 @@
                         <v-select :rules="[rules.required]" outlined dense v-model="newUser.gender" label="Gender" :items="genderOptions"></v-select>
                         </v-col>
                     </v-row>
-                    <v-row>
-                        <v-col cols="12" sm="6">
-                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.email" label="Email"></v-text-field>
+                    <v-row v-if="editUserMode">
+                        <v-col>
+                        
+                            <v-card outlined v-if="newUser.profile_pic">
+                                <v-img width="20%" height="30%" :src = "getProfileImageUrl" />
+                            </v-card>
+                            <v-card :disabled = "loading">
+                                <ImageUpload label = "Profile Picture" :uploadUrl="server_url" :memberId = "newUser.id" imageName = "profile_pic"/>
+                            </v-card>
+                            
                         </v-col>
-                        <!-- <v-col cols="12" sm="6">
-                        <v-select :rules="[rules.required]" outlined dense v-model="newUser.gender" label="Phone" :items="genderOptions"></v-select>
-                        </v-col> -->
+
+                    </v-row>
+                    <v-row v-if="editUserMode">
+                        <v-col cols="12" sm="6">
+                        
+                            <v-card outlined v-if="newUser.id_front">
+                                <v-img width="20%" height="30%" :src = "getIDFrontImageUrl" />
+                            </v-card>
+                            <v-card :disabled = "loading">
+                                <ImageUpload label = "Front ID" :uploadUrl="server_url" :memberId = "newUser.id" imageName = "id_front"/>
+                            </v-card>
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                        
+                            <v-card outlined v-if="newUser.id_back">
+                                <v-img width="20%" height="30%" :src = "getIDBackImageUrl" />
+                            </v-card>
+                            <v-card :disabled = "loading">
+                                <ImageUpload label = "Back ID" :uploadUrl="server_url" :memberId = "newUser.id" imageName = "id_back"/>
+                            </v-card>
+                        </v-col>
                     </v-row>
 
                     <!-- Address Information -->
@@ -129,7 +169,7 @@
                         <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.woreda" label="Woreda"></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6">
-                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.houseNumber" label="House Number"></v-text-field>
+                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.house_number" label="House Number"></v-text-field>
                         </v-col>
                     </v-row>
 
@@ -137,15 +177,15 @@
                     <v-card-subtitle class="label text-grey-darken-2 bold-center">Respondent</v-card-subtitle>
                     <v-row>
                         <v-col cols="12" sm="6">
-                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.respondentName" label="Name"></v-text-field>
+                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.respondent_name" label="Name"></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6">
-                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.respondentPhone" label="Phone"></v-text-field>
+                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.respondent_phone" label="Phone"></v-text-field>
                         </v-col>
                     </v-row>
                     <v-row>
                         <v-col cols="12" sm="6">
-                        <v-select :rules="[rules.required]" outlined dense v-model="newUser.respondentRelation" label="Relation" :items="familyRelations"></v-select>
+                        <v-select :rules="[rules.required]" outlined dense v-model="newUser.respondent_relation" label="Relation" :items="familyRelations"></v-select>
                         </v-col>
                     </v-row>
 
@@ -153,15 +193,15 @@
                     <v-card-subtitle class="label text-grey-darken-2 bold-center">Heir</v-card-subtitle>
                     <v-row>
                         <v-col cols="12" sm="6">
-                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.heirName" label="Name"></v-text-field>
+                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.heir_name" label="Name"></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6">
-                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.heirPhone" label="Phone"></v-text-field>
+                        <v-text-field :rules="[rules.required]" outlined dense v-model="newUser.heir_phone" label="Phone"></v-text-field>
                         </v-col>
                     </v-row>
                     <v-row>
                         <v-col cols="12" sm="6">
-                        <v-select :rules="[rules.required]" outlined dense v-model="newUser.heirRelation" label="Relation" :items="familyRelations"></v-select>
+                        <v-select :rules="[rules.required]" outlined dense v-model="newUser.heir_relation" label="Relation" :items="familyRelations"></v-select>
                         </v-col>
                     </v-row>
                     </v-form>
@@ -252,149 +292,88 @@ import 'firebase/compat/database';
 import firebase from 'firebase/compat/app';
 import { format , subDays  } from 'date-fns';
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
+import { writeFile, utils } from 'xlsx';
+import ImageUpload from '~/components/ImageUpload.vue';
 
 export default {
+    
+    computed: {
+        getIDFrontImageUrl() {
+            return `${this.server_url}/uploads/${this.newUser.id}/${this.newUser.id_front}`;
+        },
+        getIDBackImageUrl() {
+            return `${this.server_url}/uploads/${this.newUser.id}/${this.newUser.id_back}`;
+        },
+        getProfileImageUrl() {
+            return `${this.server_url}/uploads/${this.newUser.id}/${this.newUser.profile_pic}`;
+        }
+    },
+    components: {
+        ImageUpload
+    },
     // validations: {
     //     newUser: UserValidations,
     // },
     async mounted() {
-        // this.fetchDataFromAPI()
         
-        // Fetch user permissions from Firebase database when the component mounts
-        // this.fetchUserRole();
-        await firebase.auth().onAuthStateChanged(user => {
-            this.currentUser = user
+    const token = localStorage.getItem('token');
+    const settingToken = localStorage.getItem('serverURL');
+    const pots = localStorage.getItem('pots');
+    if (token) {
+      // Decode the JWT token to extract user information
+      const decodedToken = jwt.decode(token);
+    //   const settingToken = jwt.decode(siteSettings);
+      console.log(settingToken);
+      if (decodedToken) {
+        // this.$store.dispatch('auth/login', decodedToken);
+        this.currentUser = decodedToken
+        this.userRole = decodedToken.role
+        if (this.userRole == 'Admin') {
+            // this.server_url = decodedToken.
+            this.userHasPermission = true;
+        }
+        else{
+            this.userHasPermission = false
+        }
+        // if (!this.userHasPermission) {
+        //     this.$router.push('/')
+        // }
+        // else{
+        if (pots) {
+            for (let index = 1; index < parseInt(pots)+1; index++) {
+                this.potOptions.push(index)
+            }
+            console.log(this.potOptions);
+        }
+        else{
+            console.log("pots unavailable");
+        }
+        if (settingToken) {
+            this.server_url = settingToken  
+            this.fetchMembers()     
+            // this.loading = false        
+        } else {
+            console.log('Invalid setting token.');
+            this.$store.dispatch('auth/logout')
             
-            // Fetch user permissions from Firebase database when the component mounts
-            this.fetchUserRole();
-        })
-        // this.fetchUser()
-        const datePath = this.formatDate(Date.now()).toString().replace(',', '').replace(' ','')
-        const database = firebase.database();
-        const UserRef = database.ref('Members/');
-        const potsRef = database.ref('Users/');
-        const siteSettingsRef = database.ref('Settings/SiteSetting');
-        const lottoSettingsRef = database.ref('Settings/LottoSetting');
-        const lottoNumbersRef = database.ref('LottoNumber')
-        
-        lottoNumbersRef
-        .on('value', snapshot => {
-            if (snapshot.exists()) {
-                console.log(snapshot.val());
-            }
-            else{
-                console.log('no data found');
-            }
-        });       
+        }
 
-        siteSettingsRef
-        // .orderByChild('status').equalTo('Open')
-        .on('value', snapshot => {
-            if (snapshot.exists()) {
-                this.siteSettingsValues.updatedAt = snapshot.val()['UpdatedAt'];
-                this.siteSettingsValues.crc = snapshot.val()['crc'];
-                this.siteSettingsValues.dca = snapshot.val()['dca'];
-                this.siteSettingsValues.mindd = snapshot.val()['mindd'];
-                this.siteSettingsValues.maxdd = snapshot.val()['maxdd'];
-                this.siteSettingsValues.dcb = snapshot.val()['dcb'];
-                this.siteSettingsValues.dnw = snapshot.val()['dnw'];
-                this.siteSettingsValues.dwa = snapshot.val()['dwa'];
-                this.siteSettingsValues.imageUrl = snapshot.val()['imageURL'];
-                this.siteSettingsValues.mst = snapshot.val()['mst'];
-                this.siteSettingsValues.pot = snapshot.val()['pot'];
-                this.siteSettingsValues.sn = snapshot.val()['sn'];
-                this.siteSettingsValues.su = snapshot.val()['su'];
-                this.siteSettingsValues.sf = snapshot.val()['sf'];
-                this.siteSettingsValues.maxdp = snapshot.val()['maxdp'];
-                this.siteSettingsValues.maxdw = snapshot.val()['maxdw'];
-                this.siteSettingsValues.apm = snapshot.val()['apm'];
-                
-                var pots = parseInt(this.siteSettingsValues.pot) + 1
-                for (let index = 1; index < pots ; index++) {
-                    this.potOptions.push(`Pot ` + index)
-                }
-
-            }
-        });        
-        lottoSettingsRef
-        // .orderByChild('status').equalTo('Open')
-        .on('value', snapshot => {
-            this.lottoSettingsValues = []
-            if (snapshot.exists()) {
-                snapshot.forEach(element => {
-                    var newElement = {
-                        pot: null,
-                        currentLottoNumber: null,
-                        rollNumber: null,
-                        updatedAt: null,
-                    }
-                    newElement.pot = element.key
-                    newElement.currentLottoNumber = element.val()['currentLottoNumber']
-                    newElement.rollNumber = element.val()['rollNumber']
-                    newElement.updatedAt = element.val()['updatedAt']
-                    this.lottoSettingsValues.push(newElement)
-                });
-                console.log(this.lottoSettingsValues);
-                // this.lottoSettingsValues.updatedAt = snapshot.val()['UpdatedAt'];
-                // this.lottoSettingsValues.currentLottoNumber = snapshot.val()['currentLottoNumber'];
-                // this.lottoSettingsValues.rollNumber = snapshot.val()['rollNumber'];
-
-            }
-            // else{
-            //     this.lottoSettingsValues.updatedAt = Date.now();
-            //     this.lottoSettingsValues.currentLottoNumber = "000000000";
-            //     this.lottoSettingsValues.rollNumber = "0";
-            //     lottoSettingsRef.set(this.lottoSettingsValues)
-
-            // }
-        });
-        UserRef
-        // .orderByChild('status').equalTo('Open')
-        .on('value', snapshot => {
-            if (snapshot.exists()) {
-                this.User = [];
-                snapshot.forEach(childSnapshot => {
-                    const User = childSnapshot.val();
-                    // if (User.role == "Supervisor") {
-                        if (User.addedAt) {
-                            User.addedAt = this.formatDate(User.addedAt) 
-                        }
-                        // console.log(this.userHasPermission);
-                        if (!this.userHasPermission) {
-                            if (this.userRole == "Agent") {
-                                if (User.addedBy == this.currentUser.email) {
-                                    // console.log(User);
-                                    this.User.push(User);
-                                }
-                            }
-                            else if (this.userRole == "Banker") {
-                                this.User.push(User);	
-                                
-                            }
-                        }
-                        else if (this.userHasPermission) {
-                            // alert(this.userRole)
-                            // if (User.potID == this.currentUser.uid) {
-                                // console.log(User);
-                                this.User.push(User);
-                            // }
-                        }
-                        // alert(User.updatedAt)
-                        this.filteredUser = this.User
-                            
-                    // }
-                });
-                this.loading = false;
-                
-            }
-            else{
-                this.User = [];
-                this.loading = false;
-            }
-        });
+        // }
+      } else {
+        console.log('Invalid JWT token.');
+        this.$store.dispatch('auth/logout')
+      }
+    } else {
+      console.log('JWT token not found.');
+      this.$store.dispatch('auth/logout')
+    }
     },
     data() {
         return {
+            server_url: null,
+            loadingMore: false,
+            batch_number:1,
             snackBarText:'',
             timeout: 2000,
             snackbar:false,
@@ -406,7 +385,6 @@ export default {
             UserToDelete: null,
             UserToVerify: null,
             phonePrefix: '+251',
-            phoneNumbers: [''], 
             MembersForVerification: [], 
             displayInfoDialog:false,
             depositContributionDialog:false,
@@ -415,6 +393,7 @@ export default {
             currentUrl:null,
             currentPhone:null,
             userHasPermission: false,
+            generating: false,
             loading:true,
             minDate: subDays(new Date(), 1), // Set the minimum date to one day before today
             searchColumn: "name",
@@ -471,25 +450,6 @@ export default {
                 "Stepmother",
                 "Wife"
             ],
-            siteSettingsValues: {
-                updatedAt: null,
-                crc: null,
-                dca: null,
-                mindd: null,
-                maxdd: null,
-                sf: null,
-                maxdw: null,
-                maxdp: null,
-                apm: null,
-                dcb: null,
-                dnw: null,
-                dwa: null,
-                imageUrl: null,
-                mst: null,
-                pot: null,
-                sn: null,
-                su: null,
-            },
             lottoSettingsValues: [],
             selectedCode: null,
             selectedMember: null,
@@ -497,7 +457,7 @@ export default {
                 won: 'Won',
                 // winAmount: 'Win Amount',
                 // winDate: 'Win Date',
-                pot: 'Pot',
+                batch_number: 'Batch',
                 name: 'Name',
                 email: 'Email',
                 age: 'Age',
@@ -507,11 +467,11 @@ export default {
                 subcity: 'Subcity',
                 woreda: 'Woreda',
                 respondentName: 'Respondent',
-                respondentPhone: 'Respondent Phone',
-                respondentRelation: 'Respondent Relation',
-                heirName: 'Heir',
-                heirPhone: 'Heir Phone',
-                heirRelation: 'Heir Relation',
+                respondent_phone: 'Respondent Phone',
+                respondent_relation: 'Respondent Relation',
+                heir_name: 'Heir',
+                heir_phone: 'Heir Phone',
+                heir_relation: 'Heir Relation',
                 addedAt: 'Added Date',
                 addedBy: 'Added By',
                 lastDate: 'Last Lotto Date',
@@ -523,7 +483,7 @@ export default {
                 { text: 'Phone Number', value: 'phone' },
                 { text: 'Age', value: 'age' },
                 { text: 'Gender', value: 'gender' },
-                { text: 'Pot', value: 'pot' },
+                { text: 'Batch', value: 'batch_number' },
                 { text: 'Added', value: 'addedAt' },
                 { text: '', value: 'actions', sortable: false }
             ],
@@ -533,25 +493,7 @@ export default {
             addDialog: false, // Flag to control the display of the add User dialog
             addFormValid: false, // Flag to track the validity of the add User form
             addPhoneFormValid: false, // Flag to track the validity of the add phone for member form
-            newUser: {
-                id:null,
-                name: null,
-                email: null,
-                phone: null,
-                age:null,
-                gender: null,
-                city: null,
-                subcity: null,
-                woreda:null,
-                houseNumber: null,
-                respondentName: null,
-                respondentPhone: null,
-                respondentRelation:null,
-                heirName: null,
-                heirPhone: null,
-                heirRelation:null,
-                pot: null
-            },   
+            newUser: {},   
             alreadyWon:false,         
             penalized:false,         
             penalizedAmount:0,         
@@ -563,6 +505,26 @@ export default {
                 dailyContribution: null,
                 lottoNumber:null,
             },
+            BackIDisUploading : false,
+            BackIDUploadStarted : false,
+            BackIDUploadTask : null,
+            BackIDProgress : null,
+            BackIDisDeleting : false,
+            BackIDImageType : null,
+            BackIDpaused : false,
+            BackIDcancelled : false,
+            BackIDresumed : false,
+            FrontIDisUploading : false,
+            FrontIDUploadStarted : false,
+            FrontIDUploadTask : null,
+            FrontIDProgress : null,
+            FrontIDisDeleting : false,
+            FrontIDImageType : null,
+            FrontIDpaused : false,
+            FrontIDcancelled : false,
+            FrontIDresumed : false,
+            BATCH_SIZE : 1000,
+            lastKey : 0,
             rules: {
             required: value => !!value || "*Required.",
             phoneNumberRule: value => {
@@ -575,6 +537,9 @@ export default {
     },
     
     watch: {
+        
+        batch_number: 'fetchDataForSelectedPot',
+
         
       search(newValue) {
         // Check if the search input is empty
@@ -593,25 +558,15 @@ export default {
         }
       },
     },
-    methods: {   
-        
-      setSnackbarMessage(_value){
-        this.snackbar = true;
-        this.snackBarText = _value
-      },
+    methods: { 
+        setSnackbarMessage(_value){
+            this.snackbar = true;
+            this.snackBarText = _value
+        },
         valueFormatter(key, value) {
             // You can add custom formatting logic here if needed
             return value;
-        },       
-        addPhoneNumber() {
-            // Add a new empty phone number to the array
-            this.phoneNumbers.push('');
-        },
-
-        removePhoneNumber(index) {
-            // Remove the phone number at the specified index
-            this.phoneNumbers.splice(index, 1);
-        },
+        }, 
         displayFullMemberInfo(item){
             console.log(item);
             this.selectedMember = item
@@ -625,37 +580,9 @@ export default {
                 
             }
             this.selectedMember = item
+            console.log(this.selectedMember);
             this.depositContributionDialog = true
         },
-
-        fetchUserRole() {
-            const database = firebase.database();
-
-            if (this.currentUser) {
-                // alert(route.path)
-                const currentUserEmail = this.currentUser.email;
-                
-                const sanitizedEmail = currentUserEmail.replace('@', '').replace('.', '');
-
-                // Construct the path to the user in the "Users" database based on their UID
-                const userPath = 'Users/' + sanitizedEmail;
-
-                // Fetch the user permissions from the constructed path
-                database.ref(userPath).on('value', (snapshot) => {
-                const userPermissions = snapshot.val().role;
-                this.selectedCode = snapshot.val().company;
-                // alert(userPermissions);
-                this.userRole = userPermissions;
-                // alert(userPermissions);
-                if (userPermissions == "Admin") {
-                    this.userHasPermission = true;
-                } else {
-                    this.userHasPermission = false;
-                    // this.$router.push('/')
-                }
-                });
-            }
-        },  
         formatDate(timestamp) {
             return format(new Date(timestamp), 'MMM dd,yyyy');
             // return format(new Date(timestamp), 'MMM dd, yyyy HH:mm:ss');
@@ -667,24 +594,28 @@ export default {
         editUser(User) {
             this.editUserMode = true;
             // alert(User.name)
-            this.newUser.pot = User.pot;
-            this.newUser.id = User.id;
-            this.newUser.email = User.email;
-            this.newUser.name = User.name;
-            this.newUser.phone = User.phone;
-            this.newUser.age = User.age;
-            this.newUser.gender = User.gender;
-            this.newUser.city = User.city,
-            this.newUser.subcity = User.subcity,
-            this.newUser.woreda = User.woreda,
-            this.newUser.houseNumber = User.houseNumber,
-            this.newUser.respondentName = User.respondentName;
-            this.newUser.respondentPhone = User.respondentPhone;
-            this.newUser.respondentRelation = User.respondentRelation;
-            this.newUser.heirName = User.heirName;
-            this.newUser.heirPhone = User.heirPhone;
-            this.newUser.heirRelation = User.heirRelation;
+            // this.newUser.batch_number = User.batch_number;
+            // this.newUser.id = User.id;
+            // this.newUser.name = User.name;
+            // this.newUser.phone = User.phone;
+            // this.newUser.age = User.age;
+            // this.newUser.gender = User.gender;
+            // this.newUser.id_front = User.id_front;
+            // this.newUser.id_back = User.id_back;
+            // this.newUser.profile_pic = User.profile_pic;
+            // this.newUser.city = User.city,
+            // this.newUser.subcity = User.subcity,
+            // this.newUser.woreda = User.woreda,
+            // this.newUser.house_number = User.house_number,
+            // this.newUser.respondent_name = User.respondent_name;
+            // this.newUser.respondent_phone = User.respondent_phone;
+            // this.newUser.respondent_relation = User.respondent_relation;
+            // this.newUser.heir_name = User.heir_name;
+            // this.newUser.heir_phone = User.heir_phone;
+            // this.newUser.heir_relation = User.heir_relation;
+            this.newUser = User;
             this.showUserForm();
+            console.log(this.newUser.id);
         },
 
         deleteUser(User) {
@@ -698,25 +629,7 @@ export default {
             // this.$refs.UserForm.reset();
             // this.addDialog = true;
             this.editUserMode = false;
-            this.newUser = {
-                pot: null,
-                id: null,
-                email: null,
-                name: null,
-                phone: null,
-                age: null,
-                gender: null,
-                city: null,
-                subcity: null,
-                woreda: null,
-                houseNumber: null,
-                respondentName: null,
-                respondentPhone: null,
-                respondentRelation: null,
-                heirName: null,
-                heirPhone: null,
-                heirRelation: null,
-            };
+            this.newUser = {};
             this.showUserForm();
         },
 
@@ -727,7 +640,7 @@ export default {
 
         closeUserForm() {
             this.addDialog = false;
-            this.$refs.UserForm.reset();
+            // this.$refs.UserForm.reset();
             this.editUserMode = false;
         },
         
@@ -877,7 +790,7 @@ export default {
                     }
                     
                     // Search for an object with rollNumber and currentLottoNumber
-                    let searchedObject = this.lottoSettingsValues.find(obj => obj.pot === this.selectedMember.pot);
+                    let searchedObject = this.lottoSettingsValues.find(obj => obj.batch_number === this.selectedMember.batch_number);
                     var currentRollNumber = null
                     var currentLottoNumber = null
                     if (searchedObject) {
@@ -927,7 +840,7 @@ export default {
         },
         async loopLottoUpdate(penalityAmount,lastDate,totalLottoTogenerate,depositingRollNumber,currentRollNumber,selectedMember,amount,dailyContribution, currentUser){
             try {
-                const response = await fetch(`${this.siteSettingsValues.su}/update-lotto-setting`, {
+                const response = await fetch(`${this.siteSettingsValues.su}/processDeposit`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -971,88 +884,117 @@ export default {
 
                    
         },
+        async fetchMembers(){
+            this.loading = true;
+            try {
+                const response = await fetch(`http://localhost:3006/fetchMembers`, {
+                // const response = await fetch(`${this.siteSettingsValues.su}/fetchMembers`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                this.User = data.members;
+
+                this.filteredUser = this.User;
+                console.log(this.filteredUser[0]);
+                
+                
+            } catch (error) {
+                console.error('Error fetching members:', error);
+                this.setSnackbarMessage(error)
+                // return false
+                
+            }
+            this.loading = false;
+        },
         saveUser() {
             if (this.$refs.UserForm.validate()) {
-                const database = firebase.database();
+                const userData = this.editUserMode ? this.getUpdatedUserData() : this.getNewUserData();
 
-                if (this.editUserMode) {
-                const updatedUserData = {
-                    pot: this.newUser.pot,
-                    email: this.newUser.email,
-                    name: this.newUser.name,
-                    phone: this.newUser.phone,
-                    age: this.newUser.age,
-                    gender: this.newUser.gender,
-                    city: this.newUser.city,
-                    subcity: this.newUser.subcity,
-                    woreda: this.newUser.woreda,
-                    houseNumber: this.newUser.houseNumber,
-                    respondentName: this.newUser.respondentName,
-                    respondentPhone: this.newUser.respondentPhone,
-                    respondentRelation: this.newUser.respondentRelation,
-                    heirName: this.newUser.heirName,
-                    heirPhone: this.newUser.heirPhone,
-                    heirRelation: this.newUser.heirRelation,
-                    updatedAt: Date.now(),
-                    updatedBy: firebase.auth().currentUser.email,
-                };
-
-                const UserRef = database.ref('Members').child(this.newUser.id);
-
-                UserRef
-                    .update(updatedUserData)
-                    .then(() => {
-                    //console.log('User updated in Firebase successfully.');
+                // Perform POST request using fetch
+                fetch(`${this.server_url}/saveMember`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({userData : userData, edit: this.editUserMode, memberId: this.newUser.id})
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(response.message);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('User saved successfully:', data);
+                    this.setSnackbarMessage(data.message)
                     this.closeUserForm();
-                    this.editUserMode = false;
-                    this.filteredUser = this.User;
-                    })
-                    .catch((error) => {
-                    console.error('Error updating User in Firebase:', error);
-                    });
-                } else {
-
-                const sanitizedEmail = this.newUser.email.replace('@', '').replace('.', '');
-                const newUserRef = database.ref('Members').child(sanitizedEmail);
-                // const newUserKey = newUserRef.key;
-                const newUserData = {
-                    id: sanitizedEmail,
-                    pot: this.newUser.pot,
-                    email: this.newUser.email,
-                    name: this.newUser.name,
-                    phone: this.newUser.phone,
-                    age: this.newUser.age,
-                    gender: this.newUser.gender,
-                    city: this.newUser.city,
-                    subcity: this.newUser.subcity,
-                    woreda: this.newUser.woreda,
-                    houseNumber: this.newUser.houseNumber,
-                    respondentName: this.newUser.respondentName,
-                    respondentPhone: this.newUser.respondentPhone,
-                    respondentRelation: this.newUser.respondentRelation,
-                    heirName: this.newUser.heirName,
-                    heirPhone: this.newUser.heirPhone,
-                    heirRelation: this.newUser.heirRelation,
-                    won: false,
-                    online: false,
-                    addedAt: Date.now(),
-                    addedBy: firebase.auth().currentUser.email,
-                };
-
-                newUserRef
-                    .set(newUserData)
-                    .then(() => {
-                        this.setSnackbarMessage (`Succesfully added ${newUserData.email}`)   
-                        //console.log('User added to Firebase successfully.');
-                        this.closeUserForm();
-                        this.filteredUser = this.User;
-                    })
-                    .catch((error) => {
-                        this.setSnackbarMessage (`Error adding User to Firebase: ${error}`) 
-                    });
-                }
+                    // Handle success if needed
+                })
+                .catch(error => {
+                    console.error('Error saving user:', error.message);
+                    this.setSnackbarMessage(error.message)
+                    // Handle error if needed
+                });
             }
         },
+        getUpdatedUserData() {
+            return {
+                batch_number: this.newUser.batch_number,
+                name: this.newUser.name,
+                phone: this.newUser.phone,
+                age: this.newUser.age,
+                gender: this.newUser.gender,
+                profile_pic: this.newUser.profile_pic,
+                id_front: this.newUser.id_front,
+                id_back: this.newUser.id_back,
+                city: this.newUser.city,
+                subcity: this.newUser.subcity,
+                woreda: this.newUser.woreda,
+                house_number: this.newUser.house_number,
+                respondent_name: this.newUser.respondent_name,
+                respondent_phone: this.newUser.respondent_phone,
+                respondent_relation: this.newUser.respondent_relation,
+                heir_name: this.newUser.heir_name,
+                heir_phone: this.newUser.heir_phone,
+                heir_relation: this.newUser.heir_relation,
+                updatedAt: Date.now(),
+                updatedBy: this.currentUser.userId
+            };
+        },
+        getNewUserData() {
+            return {
+                batch_number: this.newUser.batch_number,
+                name: this.newUser.name,
+                phone: this.newUser.phone,
+                age: this.newUser.age,
+                gender: this.newUser.gender,
+                id_front: this.newUser.id_front,
+                id_back: this.newUser.id_back,
+                city: this.newUser.city,
+                subcity: this.newUser.subcity,
+                woreda: this.newUser.woreda,
+                house_number: this.newUser.house_number,
+                respondent_name: this.newUser.respondent_name,
+                respondent_phone: this.newUser.respondent_phone,
+                respondent_relation: this.newUser.respondent_relation,
+                heir_name: this.newUser.heir_name,
+                heir_phone: this.newUser.heir_phone,
+                heir_relation: this.newUser.heir_relation,
+                winAmount: this.siteSettingsValues.dwa,
+                won: false,
+                online: false,
+                addedAt: Date.now(),
+                addedBy: this.currentUser.userId
+            };
+        },
+
 
         confirmDeleteUser(User) {
             this.UserToDelete = User;
@@ -1063,23 +1005,28 @@ export default {
             this.confirmVerifyDialog = true;
         },
 
-        confirmDelete() {
-            if (this.UserToDelete) {
-                const database = firebase.database();
-                const UserRef = database.ref('Members').child(this.UserToDelete.id);
-
-                UserRef
-                .remove()
-                .then(() => {
-                    //console.log('User deleted from Firebase successfully.');
-                    this.confirmDeleteDialog = false;
-                    this.filteredUser = this.User.filter(
-                    (User) => User.id !== this.UserToDelete.id
-                    );
-                })
-                .catch((error) => {
-                    console.error('Error deleting User from Firebase:', error);
+        async confirmDelete() {
+            try {
+                const response = await fetch(`${this.server_url}/deleteMember/${this.UserToDelete.id}`, {
+                    method: 'DELETE'
                 });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete member');
+                }
+
+                const data = await response.json();
+                console.log('Member deleted successfully:', data.message);
+                this.setSnackbarMessage(data.message)
+                this.confirmDeleteDialog = false;
+                this.filteredUser = this.User.filter(
+                (User) => User.id !== this.UserToDelete.id
+                );
+                // Handle success if needed
+            } catch (error) {
+                console.error('Error deleting member:', error.message);
+                this.setSnackbarMessage(error.message)
+                // Handle error if needed
             }
         },
         // Function to cancel the delete action
@@ -1120,20 +1067,19 @@ export default {
         // Prepare data for export (use filteredUser instead of User)
         const data = this.filteredUser.map(User => ({
             Name: User.name,
-            Email: User.email,
             Phone: User.phone,
             Age: User.age,
             Gender: User.gender,
             City: User.city,
             Subcity: User.subcity,
             Woreda: User.woreda,
-            "House Number": User.houseNumber,
-            "Respondent Name": User.respondentName,
-            "Respondent Phone": User.respondentPhone,
-            "Respondent Relation": User.respondentRelation,
-            "Heir Name": User.heirName,
-            "Heir Phone": User.heirPhone,
-            "Heir Relation": User.heirRelation,
+            "House Number": User.house_number,
+            "Respondent Name": User.respondent_name,
+            "Respondent Phone": User.respondent_phone,
+            "Respondent Relation": User.respondent_relation,
+            "Heir Name": User.heir_name,
+            "Heir Phone": User.heir_phone,
+            "Heir Relation": User.heir_relation,
             'Added At': User.addedAt,
         }));
 
@@ -1153,27 +1099,9 @@ export default {
         closeAddForm() {
         // Close the add User dialog and reset the form
         this.addDialog = false;
-        this.$refs.UserForm.reset();
+        // this.$refs.UserForm.reset();
 
-        this.newUser = {
-                pot: null,
-                id: null,
-                email: null,
-                name: null,
-                phone: null,
-                age: null,
-                gender: null,
-                city: null,
-                subcity: null,
-                woreda: null,
-                houseNumber: null,
-                respondentName: null,
-                respondentPhone: null,
-                respondentRelation: null,
-                heirName: null,
-                heirPhone: null,
-                heirRelation: null,
-            };
+        this.newUser = {};
         },
     },
 };

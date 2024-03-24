@@ -145,110 +145,98 @@
 <script>
 import { writeFile, utils } from 'xlsx';
 import { subDays } from 'date-fns';
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/database';
 import { format } from 'date-fns';
+import jwt from 'jsonwebtoken';
 
 export default {
   // validations: {
   //     newUser: UserValidations,
   // },
   mounted() {
-      
-      firebase.auth().onAuthStateChanged(user => {
-          this.currentUser = user
-          if(this.currentUser){
-            this.fetchUserRole();
-          }
-          // alert(this.currentUser.uid)
-          // Fetch user permissions from Firebase database when the component mounts
-      })
-    //   this.fetchCompanys()
-      // this.fetchUser()
-      const database = firebase.database();
-      const UserRef = database.ref('Users');
-      const potsRef = database.ref('Supervisors');
-
-      UserRef
-      // .orderByChild('status').equalTo('Open')
-      .on('value', snapshot => {
-        if (snapshot.exists()) {
-            this.User = [];
-            snapshot.forEach(childSnapshot => {
-                const User = childSnapshot.val();
-                // if (User.updatedAt) {
-                //     User.updatedAt = this.formatDate(User.updatedAt)                    
-                // }
-                if (User.addedAt) {
-                    User.addedAt = this.formatDate(User.addedAt) 
-                }
-                // if (User.closedAt) {
-                //     User.closedAt = this.formatDate(User.closedAt)
-                // }
-                
-                this.User.push(User);
-                // alert(User.updatedAt)
-                this.filteredUser = this.User
-                console.log(this.filteredUser);
-            });
-            // this.User.forEach(element => {
-            //     console.log(element.email);
-            //     if (element.email == firebase.auth().currentUser.email) {
-            //         this.userHasPermission = element.role == "Admin"
-            //     }
-            // });
-            this.loading = false
-            
+    
+    const token = localStorage.getItem('token');
+    const settingToken = localStorage.getItem('serverURL');
+    if (token) {
+      // Decode the JWT token to extract user information
+      const decodedToken = jwt.decode(token);
+    //   const settingToken = jwt.decode(siteSettings);
+      console.log(settingToken);
+      if (decodedToken) {
+        // this.$store.dispatch('auth/login', decodedToken);
+        this.currentUser = decodedToken
+        if (decodedToken.role == 'Admin') {
+            // this.server_url = decodedToken.
+            this.userHasPermission = true;
         }
         else{
-            this.User = []
-            this.loading = false
+            this.userHasPermission = false
         }
-      });
-      this.loading = false;
+        if (!this.userHasPermission) {
+            this.$router.push('/')
+        }
+        else{
+            if (settingToken) {
+                this.server_url = settingToken  
+                this.fetchUsers()
+                this.loading = false              
+            } else {
+                console.log('Invalid setting token.');
+                this.$store.dispatch('auth/logout')
+                
+            }
+
+        }
+      } else {
+        console.log('Invalid JWT token.');
+        this.$store.dispatch('auth/logout')
+      }
+    } else {
+      console.log('JWT token not found.');
+      this.$store.dispatch('auth/logout')
+    }
   },
   data() {
       return {
-          companysOptions:["MEET Pharmacy","MEET Doctors","Tele Doctors","Tele Lawyers","Tele Automotive"],
-          showSupervisorSelect:false,
-          currentUser:null,
-          userHasPermission: false,
-          loading:true,
-          minDate: subDays(new Date(), 1), // Set the minimum date to one day before today
-          searchColumn: "name",
-          User: [],
-          search: "",
-          filteredUser: [], // Filtered User based on search
-          potOptions: [],
-          roleOptions: ["Admin", "Agent", "Banker"],
-          database: firebase.database(),
-          headers: [
-              { text: 'Name', value: 'name' },
-              { text: 'Email', value: 'email' },
-              { text: 'Role', value: 'role' },
-              { text: 'Added', value: 'addedAt' },
-              { text: '', value: 'actions', sortable: false },
-          ],
-          confirmDeleteDialog: false,
-          confirmCloseDialog: false, 
-          editUserMode: false,
-          addDialog: false, // Flag to control the display of the add User dialog
-          addFormValid: false, // Flag to track the validity of the add User form
-          newUser: {
-              name: "",
-              phone: null,
-              email: null,
-              company: null,
-              location: null,
-              role:null
-          },
-          rules: {
-          required: value => !!value || "*Required.",
-          email: (value) =>
+        server_url: null,
+        showSupervisorSelect:false,
+        currentUser:null,
+        userHasPermission: false,
+        loading:true,
+        minDate: subDays(new Date(), 1), // Set the minimum date to one day before today
+        searchColumn: "name",
+        User: [],
+        search: "",
+        filteredUser: [], // Filtered User based on search
+        potOptions: [],
+        roleOptions: ["Admin", "Agent", "Banker"],
+        headers: [
+            { text: 'Name', value: 'name' },
+            { text: 'Phone', value: 'phone' },
+            { text: 'Email', value: 'email' },
+            { text: 'Role', value: 'role' },
+            { text: 'Added', value: 'addedAt' },
+            { text: '', value: 'actions', sortable: false },
+        ],
+        confirmDeleteDialog: false,
+        confirmCloseDialog: false, 
+        editUserMode: false,
+        addDialog: false, // Flag to control the display of the add User dialog
+        addFormValid: false, // Flag to track the validity of the add User form
+        newUser: {
+            name: "",
+            phone: null,
+            email: null,
+            company: null,
+            location: null,
+            role:null
+        },
+        rules: {
+        required: value => !!value || "*Required.",
+        email: (value) =>
             /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(value) ||
             'Invalid email',
-          // min: v => (v && v.length >= 8) || "Min 8 characters",
-          },
+        // min: v => (v && v.length >= 8) || "Min 8 characters",
+        },
       };
   },
   
@@ -272,45 +260,46 @@ export default {
     },
   },
   methods: {   
-    fetchCompanys(){
-      this.database.ref('OriginalData').on('value',snapshot=>{
-        this.companysOptions = []
-        snapshot.forEach(element => {
-            this.companysOptions.push(element.key);
-        });
-      })
-    },  
+    
+    async fetchUsers(){
+            this.loading = true;
+            try {
+                // const response = await fetch(`http://localhost:3006/fetchUsers`, {
+                const response = await fetch(`${this.server_url}/fetchUsers`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                // if (response.status == 100) {
+                    
+                // }
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                // console.log(data.users);
+                this.User = data.users;
+
+                this.filteredUser = this.User;
+                // console.log(data);
+                
+                
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                this.setSnackbarMessage(error)
+                // return false
+                
+            }
+            this.loading = false;
+        },
     
     handleRoleChange() {
       // Show Supervisor v-select only when the selected role is "Sales"
       this.showSupervisorSelect = this.newUser.role != "Admin";
       // alert(this.showSupervisorSelect);
     }, 
-    fetchUserRole() {
-      const database = firebase.database();
-
-      if (this.currentUser) {
-        // alert(route.path)
-        const currentUserEmail = this.currentUser.email;
-        
-        const sanitizedEmail = currentUserEmail.replace('@', '').replace('.', '');
-
-        // Construct the path to the user in the "Users" database based on their UID
-        const userPath = 'Users/' + sanitizedEmail;
-
-        // Fetch the user permissions from the constructed path
-        database.ref(userPath).on('value', (snapshot) => {
-          const userPermissions = snapshot.val().role;
-          // alert(userPermissions);
-          if (userPermissions == "Admin") {
-            this.userHasPermission = true;
-          } else {
-            this.userHasPermission = false;
-            this.$router.push('/')
-          }
-        });
-      }
-    },
       formatDate(timestamp) {
           return format(new Date(timestamp), 'MMM dd, yyyy');
           // return format(new Date(timestamp), 'MMM dd, yyyy HH:mm:ss');
@@ -324,8 +313,6 @@ export default {
           this.newUser.role = User.role;
           if(this.newUser.role == "Supervisor"){
             this.newUser.phone = User.phone;
-            this.newUser.company = User.company;
-            this.newUser.location = User.location;
             this.showSupervisorSelect = true
 
           }
@@ -379,62 +366,20 @@ export default {
                   name: this.newUser.name,
                   phone: this.newUser.phone,
                   email: this.newUser.email,
-                  company: this.newUser.company,
-                  location: this.newUser.location,
                   role: this.newUser.role,
                   updatedAt: Date.now(),
-                  updatedBy: this.currentUser.uid,
+                  updatedBy: this.currentUser.userId,
               };
 
-              const UserRef = database.ref('Users').child(this.newUser.id);
-              // alert(UserRef)
-
-              UserRef
-                  .update(updatedUserData)
-                  .then(() => {
-                  //console.log('User updated in Firebase successfully.');
-                  this.closeUserForm();
-                  this.editUserMode = false;
-                  this.filteredUser = this.User;
-                  })
-                  .catch((error) => {
-                  console.error('Error updating User in Firebase:', error);
-                  });
               } else {
               const newUserData = {
                   name: this.newUser.name,
                   phone: this.newUser.phone,
                   email: this.newUser.email.toLowerCase(),
-                  company: this.newUser.company,
-                  location: this.newUser.location,
                   role: this.newUser.role,
-                  // currentRound: 1,
                   addedAt: Date.now(),
                   addedBy: this.currentUser.uid,
               };
-              const sanitizedEmail = this.newUser.email.toLowerCase().replace('@', '').replace('.', '');
-              const newUserRef = database.ref(`Users/${sanitizedEmail}`);
-              newUserRef.once('value', snapshot => {
-                if (snapshot.exists()) {
-                    alert("User with the same email already registered")
-                }
-                else{
-                    const newUserKey = newUserRef.key;
-
-                    newUserData.id = newUserKey;
-
-                    newUserRef
-                        .set(newUserData)
-                        .then(() => {
-                        //console.log('User added to Firebase successfully.');
-                        this.closeUserForm();
-                        this.filteredUser = this.User;
-                        })
-                        .catch((error) => {
-                        console.error('Error adding User to Firebase:', error);
-                        });
-                }
-              })
               }
           }
       },

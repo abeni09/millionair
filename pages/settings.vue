@@ -23,9 +23,9 @@
               outlined
               dense
               :disabled="loading==true"
-              ref="sn"
+              ref="site_name"
               required
-              v-model="editedItem.sn"
+              v-model="editedItem.site_name"
               hint="Enter the name of the company"
               label="Site Name"/>
           <v-text-field
@@ -33,21 +33,21 @@
               outlined
               dense
               :disabled="loading==true"
-              ref="pot"
+              ref="batch_amount"
               required
             type="number"
-              v-model="editedItem.pot"
-              label="Enter the number of pots"
-              hint="Simultaneous number of pots to start with"/>
+              v-model="editedItem.batch_amount"
+              label="Enter the number of batch"
+              hint="Simultaneous number of batch to start with"/>
           <v-text-field
           prepend-icon="mdi-timer-sand"
               outlined
               dense
               :disabled="loading==true"
               type='number'
-              ref="mst"
+              ref="memeber_spin_timeout"
               required
-              v-model="editedItem.mst"
+              v-model="editedItem.memeber_spin_timeout"
               hint="Enter the maximum amount of seconds given for a member to spin"
               label="Member Spin Timeout"/>
           <v-text-field
@@ -56,9 +56,9 @@
               dense
               :disabled="loading==true"
               type='number'
-              ref="dt"
+              ref="draw_timeout"
               required
-              v-model="editedItem.dt"
+              v-model="editedItem.draw_timeout"
               hint="Enter the maximum amount of minuted to wait for the draw to end processing"
               label="Draw Timeout"/>
           <v-text-field
@@ -67,9 +67,9 @@
               dense
               :disabled="loading==true"
               type='number'
-              ref="dcb"
+              ref="deposit_contribution_before"
               required
-              v-model="editedItem.dcb"
+              v-model="editedItem.deposit_contribution_before"
               hint="Enter the amount of money a single member will contribue BEFORE winning"
               label="Pre - Daily Contribution"/>
           <v-text-field
@@ -78,9 +78,9 @@
               dense
               :disabled="loading==true"
               type='number'
-              ref="sf"
+              ref="service_fee"
               required
-              v-model="editedItem.sf"
+              v-model="editedItem.service_fee"
               hint="Enter the amount of money paid as a service fee"
               label="Service Fee"/>
           <v-text-field
@@ -89,9 +89,9 @@
               dense
               :disabled="loading==true"
               type='number'
-              ref="mindd"
+              ref="min_deposit_days"
               required
-              v-model="editedItem.mindd"
+              v-model="editedItem.min_deposit_days"
               hint="Enter the minimum number of deposit days to process"
               label="Minimum deposit days"/>
           <v-text-field
@@ -100,9 +100,9 @@
               dense
               :disabled="loading==true"
               type='number'
-              ref="dca"
+              ref="deposit_contribution_after"
               required
-              v-model="editedItem.dca"
+              v-model="editedItem.deposit_contribution_after"
               hint="Enter the amount of money a single member will contribue AFTER winning"
               label="Post - Daily Contribution"/>
           <v-text-field
@@ -111,9 +111,9 @@
               dense
               :disabled="loading==true"
               type='number'
-              ref="maxdd"
+              ref="max_deposit_days"
               required
-              v-model="editedItem.maxdd"
+              v-model="editedItem.max_deposit_days"
               hint="Enter the maximum number of deposit days to process"
               label="Maximum deposit days"/>
           <v-text-field
@@ -122,9 +122,9 @@
               dense
               :disabled="loading==true"
               type='number'
-              ref="dnw"
+              ref="daily_number_of_winners"
               required
-              v-model="editedItem.dnw"
+              v-model="editedItem.daily_number_of_winners"
               hint="Enter the amount of members that will win in a single day"
               label="Daily number of winners"/>
           <v-text-field
@@ -132,9 +132,9 @@
                   outlined
                   dense
               :disabled="loading==true"
-              ref="dwa"
+              ref="daily_win_amount"
               type='number'
-              v-model="editedItem.dwa"
+              v-model="editedItem.daily_win_amount"
               required
               hint="Enter the amount of money a single member will win"
               label="Daily winning amount"/>
@@ -143,9 +143,9 @@
                   outlined
                   dense
               :disabled="loading==true"
-              ref="maxdw"
+              ref="max_days_to_wait"
               type='number'
-              v-model="editedItem.maxdw"
+              v-model="editedItem.max_days_to_wait"
               required
               hint="Enter the maximum number of days to wait for a member to deposit before disallowing any further deposits"
               label="Maximum days to wait"/>
@@ -154,9 +154,9 @@
                   outlined
                   dense
               :disabled="loading==true"
-              ref="maxdp"
+              ref="max_days_to_penalize"
               type='number'
-              v-model="editedItem.maxdp"
+              v-model="editedItem.max_days_to_penalize"
               required
               hint="Enter the maximum number of days to wait for a member that has won to be penalized"
               label="Maximum days to penalize"/>
@@ -165,9 +165,9 @@
                   outlined
                   dense
               :disabled="loading==true"
-              ref="apm"
+              ref="penality_fee"
               type='number'
-              v-model="editedItem.apm"
+              v-model="editedItem.penality_fee"
               required
               hint="Enter the amount of money a member that has won will be penalized"
               label="Amount of penality money"/>
@@ -176,9 +176,9 @@
                   outlined
                   dense
               :disabled="loading==true"
-              ref="crc"
+              ref="copy_right_content"
               
-              v-model="editedItem.crc"
+              v-model="editedItem.copy_right_content"
               required
               label="Copy right content"/>
           <v-text-field
@@ -186,48 +186,41 @@
                   outlined
                   dense
               :disabled="loading==true"
-              ref="su"
+              ref="server_url"
               
-              v-model="editedItem.su"
+              v-model="editedItem.server_url"
               required
               label="Server URL"/>
+          <v-text-field
+          prepend-icon="mdi-number"
+                  outlined
+                  dense
+              type='number'
+              :disabled="loading==true"
+              ref="maxmimum_members"
+              
+              v-model="editedItem.maxmimum_members"
+              required
+              label="Maxmimu Members Per Batch"/>
+          <v-text-field
+          prepend-icon="mdi-number"
+                  outlined
+                  dense
+              :disabled="loading==true"
+              ref="about_us"
+              
+              v-model="editedItem.about_us"
+              required
+              label="About Us"/>
           
-        <v-card outlined v-if="editedItem.imageURL">
-            <v-img width="20%" height="30%" :src = editedItem.imageURL />
+        <v-card outlined v-if="editedItem.image_url">
+            <v-img width="20%" height="30%" :src = "getImageUrl" />
         </v-card>
-        <v-card>
-            <v-card v-if="!editedItem.imageURL" :disabled="proPicisUploading"
-                @click="launchProPicFile">
-                <input required ref="proPicFile"
-                    @change.prevent="uploadProPicFile($event.target.files)" type="file"
-                    accept="image/jpeg, image/png" style="width: 0; height: 0;">
-                <v-progress-linear disabled="true" v-model="proPicProgress" height="25" v-if="proPicisUploading">
-                    <strong>{{ Math.ceil(proPicProgress) }}%</strong>
-                </v-progress-linear>
-                <h2 style="text-align:center;">
-                    <p>{{ proPicisUploading ? 'UPLOADING...' : 'UPLOAD LOGO' }}</p>
-                    <v-icon size="50" style="align-self: center;">mdi-upload</v-icon>
-                </h2>
-            </v-card>
-            <v-card-actions>
-                <v-btn @click="pauseProPicUpload"
-                    v-if="!editedItem.imageURL && proPicisUploading && proPicUploadStarted && proPicresumed">
-                    Pause
-                </v-btn>
-                <v-btn @click="resumeProPicUpload"
-                    v-if="!editedItem.imageURL && proPicisUploading && proPicUploadStarted && proPicpaused">
-                    Resume
-                </v-btn>
-                <v-btn @click="cancelProPicUpload"
-                    v-if="!editedItem.imageURL && proPicisUploading && proPicUploadStarted">
-                    Cancel
-                </v-btn>
-                <v-btn :disabled="proPicisDeleting" @click="deleteProPic" v-if="editedItem.imageURL">
-                    {{ proPicisDeleting ? 'Deleting...' : 'Delete' }}
-                </v-btn>
-            </v-card-actions>
+        <v-card :disabled = "loading">
+            <ImageUpload label="Logo" :uploadUrl="editedItem.server_url" imageName="Logo"/>
         </v-card>
-      </v-form>
+      
+    </v-form>
               <div class="mt-5">
                 <VBtn style="background-color: #183D0E; color: #FFC72C;" 
               :disabled="loading==true || editedItem.drawStarted" v-if="!saving"
@@ -237,14 +230,21 @@
                 <v-progress-circular v-if="saving || starping" style="width: 100%; margin: auto; color: #183D0E; " align = "center" indeterminate/>
                                 
                 <v-spacer/>
-                <VBtn  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-if="!editedItem.drawStarted && !starping"
+                <!-- <VBtn :disabled = "checkDate(editedItem.drawStartedAt,'start')"  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-if="!editedItem.drawStarted && !starping" -->
+                <VBtn class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-if="!editedItem.drawStarted && !starping" :disabled="depositing"
                @click="startDraw" block min-height="44">
                   Start Draw
                 </VBtn>
-                <VBtn  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-else-if="editedItem.drawStarted && !starping"
+                <!-- <VBtn :disabled = "checkDate(editedItem.drawEndedAt, 'stop')"  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-else-if="editedItem.drawStarted && !starping" :disabled="depositing" -->
+                <VBtn class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-else-if="editedItem.drawStarted && !starping" :disabled="depositing"
                @click="startDraw" block min-height="44">
                   Emergency Stop
                 </VBtn>
+                <!-- <VBtn :disabled = "checkDate(editedItem.drawEndedAt, 'stop')"  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-else-if="editedItem.drawStarted && !starping" -->
+                <!-- <VBtn class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" :disabled="depositing"
+               @click="startSimulation" block min-height="44">
+                  Start Simulation
+                </VBtn> -->
               </div>
   </v-card>
 
@@ -254,15 +254,26 @@
 <script>
 // import databaseAccess from '../middleware/databaseAccess'
 
-import 'firebase/compat/database';
-import firebase from "firebase/compat/app"
-import 'firebase/compat/storage'
 import axios from 'axios';
+import { format } from 'date-fns';
+import jwt from 'jsonwebtoken';
+import ImageUpload from '~/components/ImageUpload.vue';
+
 // import Dropzone from 'nuxt-dropzone'
 // import 'nuxt-dropzone/dropzone.css'
 // let uuid = require('uuid')
 
 export default {
+    
+    computed: {
+        getImageUrl() {
+            // Construct the image URL using 'editedItem.server_url' and 'editedItem.image_url'
+            return `${this.editedItem.server_url}/uploads/Logo/${this.editedItem.image_url}`;
+        }
+    },
+  components: {
+    ImageUpload
+  },
   watch:{
       $route(){
           firebase.database().ref('Settings').off('value')
@@ -270,36 +281,113 @@ export default {
       }
   },
   mounted(){
-      // alert(firebase.auth().currentUser.uid)
-    //   if (firebase.auth().currentUser.uid === "r11qt3HfbbVNIHNaQLZbePCKwDe2") {
-        // this.userIsAdmin = true
-        
-        // firebase.database().ref('lottoNumbers').remove()
-        // firebase.database().ref('allLottoNumbers').remove()
-        firebase.database()
-            .ref('Settings/SiteSetting')
-            .on('value', (snapshot) =>{
-                if(snapshot.exists()){
-                    this.settings = []
-                    // snapshot.forEach((child)=>{
-                    //     this.settings.push(child.toJSON())
-                        this.editedItem = snapshot.val()
-                        // console.log(this.editedItem)
-                    // })
-                }
-                else{
-                    this.editedItem.systemStartedAt = Date.now();
-                }
-                })
-        this.loading = false
+    
 
+        
+    const token = localStorage.getItem('token');
+    const settingToken = localStorage.getItem('serverURL');
+    if (token) {
+      // Decode the JWT token to extract user information
+      const decodedToken = jwt.decode(token);
+    //   const settingToken = jwt.decode(siteSettings);
+    //   console.log(settingToken);
+      if (decodedToken) {
+        // this.$store.dispatch('auth/login', decodedToken);
+        this.currentUser = decodedToken
+        if (decodedToken.role == 'Admin') {
+            this.userHasPermission = true;
+        }
+        else{
+            this.userHasPermission = false
+        }
+        if (!this.userHasPermission) {
+            this.$router.push('/')
+        }
+        else{
+        //     if (settingToken) {
+        //         // this.editedItem.server_url = settingToken  
+            this.fetchSiteSettings()
+        //         this.loading = false              
+        //     } else {
+        //         console.log('Invalid setting token.');
+        //         this.$store.dispatch('auth/logout')
+                
+        //     }
+
+        }
+      } else {
+        console.log('Invalid JWT token.');
+        this.$store.dispatch('auth/logout')
+      }
+    } else {
+      console.log('JWT token not found.');
+      this.$store.dispatch('auth/logout')
+    }
   },
   methods:{
-    deleteProPic() {
+    
+    handleSnackbarEvent(payload) {
+      // Call your setSnackbarMessage function here
+      this.setSnackbarMessage(payload.snackBarText);
+    },
+    
+    async fetchSiteSettings(){
+            this.loading = true;
+            try {
+                const response = await fetch(`http://localhost:3006/fetchSiteSettings`, {
+                // const response = await fetch(`${this.editedItem.server_url}/fetchSiteSettings`, {
+                // const response = await fetch(`${this.siteSettingsValues.server_url}/generate-users`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                // if (response.status == 100) {
+                    
+                // }
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log(data.settings);
+                if (data.settings != null) {
+                    this.editedItem = data.settings;
+                    console.log(this.editedItem);
+                    
+                }
+                // console.log(data);
+                
+                
+            } catch (error) {
+                console.error('Error fetching members:', error);
+                this.setSnackbarMessage(error)
+                // return false
+                
+            }
+            this.loading = false;
+        },
+    checkDate(date, start){
+        if (start == 'start' && date != null) {
+            return this.formatDate(date).toString() == this.formatDate(Date.now()).toString()    
+        }
+        else if(start == 'stop' && date != null){
+            return this.formatDate(date).toString() == this.formatDate(Date.now()).toString()
+        }
+        else{
+            return false
+        }
+    },
+    
+    formatDate(timestamp) {
+          return format(new Date(timestamp), 'MMM dd, yyyy');
+          // return format(new Date(timestamp), 'MMM dd, yyyy HH:mm:ss');
+      },
+        deleteProPic() {
             this.proPicisDeleting = true
-            firebase.storage().refFromURL(this.editedItem.imageURL).delete()
+            firebase.storage().refFromURL(this.editedItem.image_url).delete()
                 .then(() => {
-                        this.editedItem.imageURL = '',
+                        this.editedItem.image_url = '',
                         this.proPicProgress = null,
                         this.proPicisDeleting = false
                 })
@@ -311,7 +399,7 @@ export default {
         launchProPicFile() {
             this.$refs.proPicFile.click()
         },
-        uploadProPicFile(files) {
+        async uploadProPicFile(files) {
             if (!files.length) {
                 return
             }
@@ -328,42 +416,21 @@ export default {
 
             this.proPicisUploading = true
             this.proPicUploadStarted = true
+            const formData = new FormData();
+            formData.append('image', file); // 'file' is the selected image file
+            await fetch(`http://localhost:3006/upload`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.editedItem.image_url = data.imageUrl;
+                // Use the imageUrl to display the uploaded image or store it in your database
+            })
+            .catch(error => console.error('Error uploading image:', error));
 
-            // Create a reference to the destination where we're uploading
-            // the file.
-            const storage = firebase.storage()
-            // var ext = file.name.split('.').pop()
-            // alert(ext)
-            const ref = storage.ref(`Settings/Logo.${file.name.split('.').pop().toLowerCase()}`)
 
-            var uploadTask = ref.put(file, metadata)
-            this.proPicUploadTask = uploadTask
-            this.proPicUploadTask.on('state_changed',
-                (snapshot) => {
-                    this.proPicProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    // console.log('Upload is ' + this.progress + '% done');
-                    switch (snapshot.state) {
-                        case firebase.storage.TaskState.PAUSED: // or 'paused'
-                            this.setSnackbarMessage('Upload is paused')
-                            break;
-                        case firebase.storage.TaskState.RUNNING: // or 'running'
-                            this.setSnackbarMessage('Upload is running')
-                            break;
-                    }
-                },
-                (error) => {
-                    alert(error)
-                },
-                () => {
-                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        this.proPicImageType = downloadURL.split('.').pop()
-                        this.editedItem.imageURL = downloadURL
-                        this.editedItem.imageURL = downloadURL
-                        this.proPicisUploading = false
-        
-                    });
-                }
-            )
+            this.proPicisUploading = false
         },
         pauseProPicUpload() {
             if (this.proPicUploadTask != null) {
@@ -394,33 +461,45 @@ export default {
         setSnackbarMessage(_value){
             this.snackbar = true;
             this.snackBarText = _value
+        },  
+        async save() {
+            this.saving = true;
+            // this.editedItem.updated_at = Date.now();
+            this.editedItem.updated_at = 'NOW()';
+            this.editedItem.drawstarted = false;
+            console.log(`${this.editedItem.server_url}/updateSiteSettings`);
+            try {
+                const response = await fetch(`${this.editedItem.server_url}/updateSiteSettings`, {
+                // const response = await fetch(`http://localhost:3006/updateSiteSettings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({userId: 1, updatedData: this.editedItem}),
+                })
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                this.setSnackbarMessage(data.message)
+                this.saving = false
+                // console.log(data);
+                
+                
+            } catch (error) {
+                this.saving = false
+                console.error('Error updating settings:', error);
+                this.setSnackbarMessage(error)
+                
+            }
         },
-        save(){
 
-            this.saving = true
-            
-            this.editedItem.UpdatedAt = Date.now();
-            this.editedItem.drawStarted = false;
-            // alert(this.editedItem.su)
-            console.log(this.editedItem);
-
-            fetch(`${this.editedItem.su}/update-settings`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(this.editedItem),
-            })
-            .then(response => response.json())
-            .then(data => this.setSnackbarMessage(data.message))
-            .then(() => this.saving = false)
-            .catch(error => this.setSnackbarMessage(error))
-
-        },
         async startDraw() {
             this.starping = true
             try {
-                const response = await fetch(`${this.editedItem.su}/start-draw`, {
+                const response = await fetch(`${this.editedItem.server_url}/startDraw`, {
+                // const response = await fetch(`http://localhost:3007/startDraw`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -432,6 +511,7 @@ export default {
                 }
 
                 const data = await response.json();
+                this.editedItem.drawStarted = true
                 this.setSnackbarMessage(data.message)
                 this.starping = false
                 // console.log(data);
@@ -444,28 +524,54 @@ export default {
                 
             }
 
-            // .then(response => response.json())
-            // .then(data => this.setSnackbarMessage(data.message))
-            // .then(() => this.saving = false)
-            // .catch(error => this.setSnackbarMessage(error))
+        },
+        async startSimulation() {
+            this.depositing = true
+            try {
+                const response = await fetch(`${this.editedItem.server_url}/calculate-days`, {
+                // const response = await fetch(`http://localhost:3007/calculate-days`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                this.setSnackbarMessage(data.message)
+                this.depositing = false
+                // console.log(data);
+                
+                
+            } catch (error) {
+                this.depositing = false
+                console.error('Error starting draw:', error);
+                this.setSnackbarMessage(error)
+                
+            }
 
         },
 
   },
 
  data: () => ({
+    userHasPermission: false,
+    // server_url: null,
     snackBarText:'',
     timeout: 2000,
     snackbar:false,
     saving : false,
     starping : false,
+    depositing : false,
     lottoNumbersgenerated : false,
     lottoNumbersgenerating : false,
   
     proPicImageType: null,
     
     proPicProgress: null,
-    // editedItem.imageURL: '',
+    // editedItem.image_url: '',
     proPicpaused: false,
     proPicresumed: true,
     proPiccancelled: false,
@@ -489,27 +595,31 @@ export default {
      settings: [],
 
     editedItem: {
+        maxmimum_members: 100000,
         systemStartedAt: null,
         drawStarted: false,
-        sn: 'Millionair',
-        pot: 10,
-        mst: 10,
-        dt: 30,
-        sf: 50,
-        dcb: 50,
-        mindd: 15,
-        maxdd: 30,
-        apm: 80,
-        maxdw: 15,
-        maxdp: 30,
-        dca: 550,
-        dnw: 5,
-        dwa: 1000000,
-        crc: 'Million Cash Financing All Rights Reserved',
-        su: '',
-        imageURL:'',
-        UpdatedAt:null,
-        UpdatedBy: firebase.auth().currentUser.email,
+        drawEndedAt: null,
+        drawStartedAt: null,
+        site_name: 'Derash',
+        batch_amount: 10,
+        memeber_spin_timeout: 10,
+        draw_timeout: 30,
+        service_fee: 50,
+        deposit_contribution_before: 50,
+        min_deposit_days: 15,
+        max_deposit_days: 30,
+        penality_fee: 80,
+        max_days_to_wait: 15,
+        max_days_to_penalize: 30,
+        deposit_contribution_after: 550,
+        daily_number_of_winners: 5,
+        daily_win_amount: 1000000,
+        copy_right_content: '',
+        server_url: '',
+        about_us:'',
+        image_url:'',
+        updated_at:null,
+        updated_by: 1,
     }
 }),
 

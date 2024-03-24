@@ -4,25 +4,24 @@
       <VCol cols="8" md="8" lg="8" sm="8">
         <VRow no-gutters align="center" justify="center">
           <VCol cols="12" md="6">
-            <h1 align="center">{{ isResetPassword ? 'Reset password' : 'Log In' }}</h1>
+            <h1 align="center">Log in</h1>
             <p align="center" class="text-medium-emphasis">
-              {{ isResetPassword ? 'Add your email to get instructions' : 'Enter your details to get started' }}
+              Enter your details to get started
             </p>
 
-            <VForm v-if="!isResetPassword" ref="loginForm" v-model="valid" lazy-validation class="mt-7">
+            <VForm ref="loginForm" v-model="valid" lazy-validation class="mt-7">
               <div class="mt-1">
-                <!-- <label class="label text-grey-darken-2" for="email">Email</label> -->
                 <VTextField
                 outlined
                 
                   :disabled="loading"
-                  v-model="loginEmail"
-                  :rules="loginEmailRules"
-                  prepend-icon="mdi-email-outline"
-                  label="Email"
-                  id="email"
-                  name="email"
-                  type="email"
+                  v-model="loginPhone"
+                  :rules="loginPhoneRules"
+                  prepend-icon="mdi-phone-outline"
+                  label="Phone"
+                  id="phone"
+                  name="phone"
+                  type="number"
                 />
               </div>
               <!-- Show password input only in login mode -->
@@ -45,7 +44,7 @@
                   name="password"
                 />
               </div>
-              <div v-if="!isResetPassword && confirmPasswordVisible" class="mt-1">
+              <div v-if="confirmPasswordVisible" class="mt-1">
                 <!-- <label class="label text-grey-darken-2" for="confirmPassword">Confirm Password</label> -->
                 <VTextField
                 outlined
@@ -69,41 +68,6 @@
                 <v-progress-circular style="width: 100%; margin: auto; color: #183D0E; " align = "center" v-if="loading" indeterminate/>
               </div>
             </VForm>
-            <VForm v-if="isResetPassword" ref="resetForm" v-model="valid" lazy-validation class="mt-7">
-              <div class="mt-1">
-                <!-- <label class="label text-grey-darken-2" for="email">Email</label> -->
-                <VTextField
-                outlined
-                
-                  :disabled="loading"
-                  v-model="loginEmail"
-                  :rules="loginEmailRules"
-                  prepend-icon="mdi-email-outline"
-                  label="Email"
-                  id="email"
-                  name="email"
-                  type="email"
-                />
-              </div>
-              <div class="mt-5">
-                <VBtn style="background-color: #183D0E; color: #FFC72C;" v-if="!loading && isResetPassword" :disabled="!valid"  @click="validate" block min-height="44" class="gradient">
-                  Send instructions
-                </VBtn>
-                <v-progress-circular style="width: 100%; margin: auto; color: #183D0E; " align = "center" v-if="loading" indeterminate/>
-              </div>
-            </VForm>
-            <p class="text-body-2 mt-10">
-              {{ isResetPassword
-                ? 'Remember your password?'
-                : 'Forgot your password?'
-              }}
-              <span
-                @click="toggleResetPassword"
-                class="font-weight-bold text-primary cursor-pointer"
-              >
-                {{ isResetPassword ? 'Sign In' : 'Reset Password' }}
-              </span>
-            </p>
           </VCol>
         </VRow>
       </VCol>
@@ -128,18 +92,16 @@
 </template>
 
   <script>
-  import firebase from "firebase/compat/app";
-  import "firebase/compat/auth";
-  import "firebase/compat/database";
+  import { mapActions } from 'vuex'
   
   export default {
     
     data() {
       return {
+        server_url:null,
         snackBarText:'',
         timeout: 2000,
         snackbar:false,
-        isResetPassword: false,
         confirmPasswordVisible: false,
         userAvailable: false,
         loading: false,
@@ -152,10 +114,15 @@
         valid: true,
         loginPassword: "",
         confirmPassword: null,
-        loginEmail: "",
+        loginPhone: "",
         loginEmailRules: [
           v => !!v || "Required",
           v => /.+@.+\..+/.test(v) || "E-mail must be valid",
+        ],
+        loginPhoneRules: [
+          v => !!v || "Required",
+          v => (v && /^\d+$/.test(v)) || "Phone number must contain only digits",
+          v => (v && (v.length == 9)) || "Phone number must be 9 digits",
         ],
         rules: {
           required: value => !!value || "*Required.",
@@ -163,111 +130,100 @@
         },
       };
     },
-    computed: {
-      sanitizedEmail() {
-        return this.loginEmail.toLowerCase().replace('@', '').replace('.', '');
-      },
-    },
     methods: {
-      toggleResetPassword(){
-        this.isResetPassword = !this.isResetPassword;
-      },
+      
+      ...mapActions('auth', ['login']), // Map the 'login' action from the 'auth' module
+
       setSnackbarMessage(_value){
         this.snackbar = true;
         this.snackBarText = _value
       },
+      
+      // async fetchSiteSettings(){
+      //   this.loading = true;
+      //   try {
+      //       const response = await fetch(`http://localhost:3006/fetchSiteSettings`, {
+      //       // const response = await fetch(`${this.siteSettingsValues.server_url}/generate-users`, {
+      //           method: 'GET',
+      //           headers: {
+      //               'Content-Type': 'application/json',
+      //           },
+      //       })
+      //       // if (response.status == 100) {
+                
+      //       // }
+      //       if (!response.ok) {
+      //           throw new Error(`HTTP error! Status: ${response.status}`);
+      //       }
+
+      //       const data = await response.json();
+      //       console.log(data.settings);
+      //       if (data.settings != null) {
+      //           this.server_url = data.settings.server_url;
+                
+      //       }
+      //       // console.log(data);
+            
+            
+      //   } catch (error) {
+      //       console.error('Error fetching members:', error);
+      //       this.setSnackbarMessage(error)
+      //       // return false
+            
+      //   }
+      //   this.loading = false;
+      // },
       async validate() {
-        if (this.isResetPassword) {
-          if (this.$refs.resetForm.validate()) {
-            this.loading = true;
-            try {
-              // Reset password logic using Firebase
-              await firebase.auth().sendPasswordResetEmail(this.loginEmail);
-              this.loading = false;
-              this.setSnackbarMessage('Password reset instructions sent to your email.');
-            } catch (error) {
-              this.loading = false;
-              this.setSnackbarMessage(error);
+        if (this.$refs.loginForm.validate()) {
+          if (this.confirmPasswordVisible) {
+            // Check if the passwords match
+            if (this.loginPassword !== this.confirmPassword) {
+              // this.setSnackbarMessage("Passwords do not match");
+              this.setSnackbarMessage("Passwords do not match")
+              return;
             }
           }
-          
-        }
-        else{
-          if (this.$refs.loginForm.validate()) {
-            if (this.confirmPasswordVisible) {
-              // Check if the passwords match
-              if (this.loginPassword !== this.confirmPassword) {
-                // this.setSnackbarMessage("Passwords do not match");
-                this.setSnackbarMessage("Passwords do not match")
-                return;
-              }
-            }
-            this.loading = true;
-    
-            try {
-              // Check if the email exists in the Users database
-              const snapshot = await firebase
-                .database()
-                .ref(`Users/${this.sanitizedEmail}`)
-                .once('value');
-    
-              if (snapshot.exists()) {
-                // Attempt to sign in the user
-                await firebase.auth().signInWithEmailAndPassword(
-                  this.loginEmail,
-                  this.loginPassword
-                )
-                // User is signed in
-                this.loading = false;
-                //console.log('User signed in');
-              }
-              else{
-                  this.setSnackbarMessage("Invalid email or password")
-                  this.confirmPasswordVisible = false
-                  this.confirmPassword = ''
-                  this.loading = false
-              }
-            } catch (error) {
-              this.handleAuthenticationError(error);
-            }
-          }
-        }
-      },
-      async handleUserNotFound() {
-        // Attempt to create a new user
-        firebase.auth().createUserWithEmailAndPassword(
-          this.loginEmail,
-          this.loginPassword
-        ).catch((error) => {
-          if (error.code === 'auth/email-already-in-use') {
-            this.setSnackbarMessage("Invalid email or password")
-            this.confirmPasswordVisible = false
-          } else {
-            this.setSnackbarMessage('Unable to create an account');
-          }
-          this.loading = false;
-        });
-      },
-      handleAuthenticationError(error) {
-        if (error.code === 'auth/invalid-login-credentials') {
-          if(this.confirmPasswordVisible){
-            this.handleUserNotFound()
-          }
-          else{
-            this.openPasswordConfirmationDialog()
-          }
-          // this.handleUserNotFound();
-        } else {
-          this.setSnackbarMessage(error.code);
-        }
-        this.loading = false;
-      },
+          this.loading = true;
+  
+          try {
+            const response = await fetch('http://localhost:3006/loginStaff', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                phone: this.loginPhone,
+                password: this.loginPassword,
+                confirm: this.confirmPasswordVisible
+              })
+            });
+            // const finalResponse = await response.json();
+            const data = await response.json();
+            console.log(data)
 
-      openPasswordConfirmationDialog() {
-        this.confirmPasswordVisible = true;
-        this.loading = false
-      },
+            if (!response.ok) {
+              throw new Error(data.message);
+            } else {
+              // Dispatch 'login' action with user data
+              if (data.confirm) {
+                this.confirmPasswordVisible = true
+              } else {
+                // After receiving the token from the server response
+                // this.$cookies.set('token', data.token);
+                localStorage.setItem('token', data.token)
+                this.$store.dispatch('auth/login', data.data);
+              }
+            }
 
+            this.setSnackbarMessage(data.message);
+          } catch (error) {
+            console.error(`Error loging in: ${error}`);
+            this.setSnackbarMessage(error);
+          } finally {
+            this.loading = false;
+          }
+        }
+      },
     },
   };
   </script>

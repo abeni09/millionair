@@ -14,9 +14,11 @@
   },
   "main": "index.js",
   "dependencies": {
+    "exceljs": "^4.4.0",
     "express-rate-limit": "^7.1.5",
     "firebase-admin": "^11.8.0",
-    "firebase-functions": "^4.3.1"
+    "firebase-functions": "^4.3.1",
+    "plotly": "^1.0.6"
   },
   "devDependencies": {
     "eslint": "^8.15.0",

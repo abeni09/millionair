@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "millionair-cb16a"
-  }
+    "default": "millionair-cb16a",
+    "staging": "equb-eb08a"
+  },
+  "targets": {},
+  "etags": {}
 }

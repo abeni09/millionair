@@ -21,8 +21,9 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
-
+  plugins: [
+    { src: '~/plugins/cookies', mode: 'client' } // Ensure it runs only on the client side
+  ],
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
 
@@ -40,14 +41,14 @@ export default {
       '@nuxtjs/firebase',
       {
         config: {
-          apiKey: "AIzaSyCexNLOztCi0nhbwF03b2_HrSqWoDqHYcw",
-          authDomain: "millionair-cb16a.firebaseapp.com",
-          projectId: "millionair-cb16a",
-          storageBucket: "millionair-cb16a.appspot.com",
-          messagingSenderId: "572060430916",
-          appId: "1:572060430916:web:fdc1575e587528fc00c211",
-          measurementId: "G-9NPE9CMDWQ",
-          databaseURL: "https://millionair-cb16a-default-rtdb.firebaseio.com/"
+          apiKey: "AIzaSyBILi-glnTmpwQaevsWo4UcladEYm35uqU",
+          authDomain: "equb-eb08a.firebaseapp.com",
+          projectId: "equb-eb08a",
+          storageBucket: "equb-eb08a.appspot.com",
+          messagingSenderId: "713993264198",
+          appId: "1:713993264198:web:00a0f07b12db38ec3d7e47",
+          measurementId: "G-3WH52P2475",
+          databaseURL: "https://equb-eb08a-default-rtdb.firebaseio.com/"
         },
         services: {
           auth: true,
@@ -63,7 +64,7 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
-    baseURL: '/',
+    baseURL: 'http://localhost:3006',
   },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify

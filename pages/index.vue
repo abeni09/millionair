@@ -134,10 +134,9 @@
 <script>
 import DashCard from '../components/Dashboard/DashCard.vue'
 import DashCardForReport from '../components/Dashboard/DashCardForReport.vue'
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/database';
 import { format } from 'date-fns';
 import { writeFile, utils } from 'xlsx';
+import jwt from 'jsonwebtoken';
 export default {
 
   // props: {
@@ -156,13 +155,13 @@ export default {
     },
     dashboardPotCards() {
       return [
-        { title: "How many people can the money an individual, that has already been lucky, contributes a day reach (paid) to?", icon:"mdi-pot", countItems: (parseInt(this.siteSettings.dca)/this.stillToWinMembers.length)/parseInt(this.siteSettings.dwa)},
-        { title: "How many people can the money all individual(s), that has already been lucky, contribute a day reach (paid) to?", icon:"mdi-pot", countItems: ((parseInt(this.siteSettings.dca) * this.winnerMembers.length)/this.stillToWinMembers.length)/parseInt(this.siteSettings.dwa)},
-        { title: "How many people can the money an individual, that is yet to be lucky, contributes a day reach (paid) to?", icon:"mdi-pot", countItems: (parseInt(this.siteSettings.dcb)/this.stillToWinMembers.length)/parseInt(this.siteSettings.dwa)},
-        { title: "How many people can the money all individual(s), that is yet to be lucky, contribute a day reach (paid) to?", icon:"mdi-pot", countItems: ((parseInt(this.siteSettings.dcb) * this.stillToWinMembers.length)/this.stillToWinMembers.length)/parseInt(this.siteSettings.dwa)},
-        { title: "How many people can the money all individual(s) contribute a day reach (paid) to?", icon:"mdi-pot", countItems: (((parseInt(this.siteSettings.dcb) * this.stillToWinMembers.length) + (parseInt(this.siteSettings.dca) * this.winnerMembers.length))/this.stillToWinMembers.length)/parseInt(this.siteSettings.dwa)},
-        { title: "How many days left to finish?", icon:"mdi-account", countItems: this.stillToWinMembers.length/parseInt(this.siteSettings.dnw) },
-        { title: "How much money left to finish?", icon:"mdi-account", countItems: this.stillToWinMembers.length * parseInt(this.siteSettings.dwa) },
+        { title: "How many people can the money an individual, that has already been lucky, contributes a day reach (paid) to?", icon:"mdi-pot", countItems: this.q0},
+        { title: "How many people can the money all individual(s), that has already been lucky, contribute a day reach (paid) to?", icon:"mdi-pot", countItems: this.q1},
+        { title: "How many people can the money an individual, that is yet to be lucky, contributes a day reach (paid) to?", icon:"mdi-pot", countItems: (this.siteSettings.dcb/this.stillToWinMembers.length/this.siteSettings.dwa).toExponential(3)},
+        { title: "How many people can the money all individual(s), that is yet to be lucky, contribute a day reach (paid) to?", icon:"mdi-pot", countItems: (((parseInt(this.siteSettings.dcb) * this.stillToWinMembers.length)/this.stillToWinMembers.length)/parseInt(this.siteSettings.dwa)).toExponential(3)},
+        { title: "How many people can the money all individual(s) contribute a day reach (paid) to?", icon:"mdi-pot", countItems: ((((parseInt(this.siteSettings.dcb) * this.stillToWinMembers.length) + (parseInt(this.siteSettings.dca) * this.winnerMembers.length))/this.stillToWinMembers.length)/parseInt(this.siteSettings.dwa)).toExponential(3)},
+        { title: "How many days left to finish?", icon:"mdi-account", countItems: (this.stillToWinMembers.length/parseInt(this.siteSettings.dnw).toExponential(3)) },
+        { title: "How much money left to finish?", icon:"mdi-account", countItems: (this.stillToWinMembers.length * parseInt(this.siteSettings.dwa)).toExponential(3) },
         { title: "How much money collected so far from contribution?", icon:"mdi-account", countItems: this.totalDepositPerPot},
         { title: "How much money payed so far for those who got lucky?", icon:"mdi-account", countItems: this.winnerMembers.length * parseInt(this.siteSettings.dwa) },
         
@@ -170,11 +169,11 @@ export default {
     },
     specificMemberCards() {
       const cards = [
-        { won:false, title: "How many days left until this individual gets lucky?", icon:"mdi-pot", countItems: (parseInt(this.siteSettings.dwa) - this.selectedMemberBeforeDeposit)/this.siteSettings.dcb},
-        { won:false, title: "How much money this individual must pay to get lucky?", icon:"mdi-pot", countItems: parseInt(this.siteSettings.dwa) - this.selectedMemberBeforeDeposit},
-        { won:true, title: "How many days has this individual been contributing before getting lucky?", icon:"mdi-pot", countItems: this.selectedMemberBeforeDeposit/this.siteSettings.dcb},
+        { won:false, title: "How many days left until this individual gets lucky?", icon:"mdi-pot", countItems: ((parseInt(this.siteSettings.dwa) - this.selectedMemberBeforeDeposit)/this.siteSettings.dcb).toExponential(3)},
+        { won:false, title: "How much money this individual must pay to get lucky?", icon:"mdi-pot", countItems: (parseInt(this.siteSettings.dwa) - this.selectedMemberBeforeDeposit).toExponential(3)},
+        { won:true, title: "How many days has this individual been contributing before getting lucky?", icon:"mdi-pot", countItems: (this.selectedMemberBeforeDeposit/this.siteSettings.dcb).toExponential(3)},
         { won:true, title: "How much money has this individual contributed before getting lucky?", icon:"mdi-pot", countItems: this.selectedMemberBeforeDeposit},
-        { won:true, title: "How many days has this individual left to finish contributing after getting lucky?", icon:"mdi-pot", countItems: (parseInt(this.siteSettings.dwa) - this.selectedMemberTotalDeposit)/this.siteSettings.dca},
+        { won:true, title: "How many days has this individual left to finish contributing after getting lucky?", icon:"mdi-pot", countItems: ((parseInt(this.siteSettings.dwa) - this.selectedMemberTotalDeposit)/this.siteSettings.dca).toExponential(3)},
         { won:true, title: "How much money is this individual left to finish contributing after getting lucky?", icon:"mdi-account", countItems: parseInt(this.siteSettings.dwa) - this.selectedMemberTotalDeposit },
       ];
       return cards.filter(card=> card.won == this.selectedMember.won)
@@ -189,6 +188,15 @@ export default {
   name: 'IndexPage',
   data(){
     return{
+      q0: 0,
+      q1: 0,
+      q2: 0,
+      q3: 0,
+      q4: 0,
+      q5: 0,
+      q6: 0,
+      q7: 0,
+      q8: 0,
       totalMembers: 0,
       totalPots: 0,
       // specificShared: 0,
@@ -229,6 +237,32 @@ export default {
 
   },
   mounted(){
+    
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Decode the JWT token to extract user information
+      const decodedToken = jwt.decode(token);
+      if (decodedToken) {
+        // this.$store.dispatch('auth/login', decodedToken);
+        this.currentUser = decodedToken
+        if (decodedToken.role == 'Admin') {
+          this.userHasPermission = true;
+        }
+        else{
+          this.userHasPermission = false
+        }
+        this.checkUserHasPermission
+      } else {
+        console.log('Invalid JWT token.');
+        this.$store.dispatch('auth/logout')
+      }
+    } else {
+      console.log('JWT token not found.');
+      this.$store.dispatch('auth/logout')
+    }
+    if (this.userHasPermission) {
+      
+    }
     firebase.auth().onAuthStateChanged(async user => {
       this.currentUser = user
       const database = firebase.database();
@@ -255,32 +289,35 @@ export default {
             // this.company = snapshot.val().company
           }
         })
+        if (!this.userHasPermission) {
+          database.ref('Members').orderByChild('pot').on('value',snapshot=>{
+            this.totalMember = 0, 
+              this.originalMemberOptions = []
+            snapshot.forEach(element => {
+              database.ref('Members').child(element.key).child('Deposit').once('value',snap=>{
+                if (snap.exists()) {
+                  snap.forEach(deposit => {
+                    const newDeposit = {
+                      pot: element.val().pot,
+                      amount: deposit.val().amount,
+                    };
+                    this.deposits.push(newDeposit)
 
-        database.ref('Members').on('value',snapshot=>{
-          this.totalMember = 0,
-            this.originalMemberOptions = []
-          snapshot.forEach(element => {
-            database.ref('Members').child(element.key).child('Deposit').once('value',snap=>{
-              if (snap.exists()) {
-                snap.forEach(deposit => {
-                  const newDeposit = {
-                    pot: element.val().pot,
-                    amount: deposit.val().amount,
-                  };
-                  this.deposits.push(newDeposit)
+                  })
+                  
+                }
+              })
+              // if (this.userHasPermission) {
 
-                })
-                
-              }
-            })
-            // if (this.userHasPermission) {
+                this.originalMemberOptions.push(element.val());
+              // }
+              this.totalMembers = this.totalMembers + 1
+            });
+            console.log("Member fetched");
+          })
+          
+        }
 
-              this.originalMemberOptions.push(element.val());
-            // }
-            this.totalMembers = this.totalMembers + 1
-          });
-          console.log("Member fetched");
-        })
       }
       this.fetchSiteSettings()
       this.fetchLottoSettings()
@@ -294,7 +331,73 @@ export default {
 
 
   },
+  
   methods:{
+    
+    async fetchMembers(){
+      this.loading = true;
+      try {
+          const response = await fetch(`http://localhost:3006/fetchMembers`, {
+          // const response = await fetch(`${this.siteSettingsValues.su}/generate-users`, {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+          })
+          // if (response.status == 100) {
+              
+          // }
+          if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          // console.log(data.members);
+          this.originalMemberOptions = data.members;
+
+          // this.filteredUser = this.User;
+          // console.log(data);
+          
+          
+      } catch (error) {
+          console.error('Error fetching members:', error);
+          this.setSnackbarMessage(error)
+          // return false
+          
+      }
+      this.loading = false;
+  },
+    async fetchDeposits(){
+      this.loading = true;
+      try {
+          const response = await fetch(`http://localhost:3006/fetchDeposits`, {
+          // const response = await fetch(`${this.siteSettingsValues.su}/generate-users`, {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+          })
+          // if (response.status == 100) {
+              
+          // }
+          if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          // console.log(data.Deposits);
+          this.deposits = data.deposits;
+          
+          
+      } catch (error) {
+          console.error('Error fetching Deposits:', error);
+          this.setSnackbarMessage(error)
+          // return false
+          
+      }
+      this.loading = false;
+    },
+    
     fetchDataForSelectedMember(){
       
       if (this.originalMemberOptions.length != 0) {
@@ -344,7 +447,7 @@ export default {
         this.memberOptions = this.originalMemberOptions
           .filter(sale => sale.pot === this.pot)
           .map(sale => ({
-            text: `${sale.name} (${sale.phone})`,
+            text: `${sale.name} (${sale.age})`,
             value: sale.id,
           }));
         this.filteredDeposits = this.deposits
@@ -356,7 +459,9 @@ export default {
           .filter(sale => sale.pot === this.pot && sale.won == true)
         this.stillToWinMembers = this.originalMemberOptions
           .filter(sale => sale.pot === this.pot && sale.won != true)
-        
+          console.log((this.siteSettings.dca)/this.stillToWinMembers.length);
+        this.q0 = (this.siteSettings.dca/(this.stillToWinMembers.length * this.siteSettings.dwa)).toExponential(3)
+        this.q1 = ((parseInt(this.siteSettings.dca) * this.winnerMembers.length)/(this.stillToWinMembers.length) * parseInt(this.siteSettings.dwa)).toExponential(3)
       }
       // Replace this with your actual logic
       // console.log(`Fetching data for pot: ${this.filteredDeposits[0].amount}`);
@@ -443,7 +548,7 @@ export default {
         //   this.siteSettings.push(element.val())
         // });
         console.log("Site Settings fetched");
-        this.loading = false
+        // this.loading = false
       })
     },
     fetchLottoSettings(){
@@ -456,7 +561,7 @@ export default {
         });
         console.log("Lotto Settings fetched");
         console.log(this.lottoSettings);
-        this.loading = false
+        // this.loading = false
       })
     },
 
