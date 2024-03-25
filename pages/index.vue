@@ -5,7 +5,7 @@
       <v-card >
         <v-row class = 'ma-1' style="background-color: aliceblue; margin-bottom: 1%;">
           <v-card-title class="headline centered-title">
-            Report for {{ member }} ({{ pot }})
+            Report for {{ member }} ({{ batch_number }})
           </v-card-title>
         </v-row>
         <v-card-text>
@@ -54,7 +54,7 @@
           outlined
           clearable
           dense
-          v-model="pot"
+          v-model="batch_number"
           label="Pots"
           :items="potOptions"
         />
@@ -65,7 +65,7 @@
              md="4"
              sm="6">
         <v-select
-        :disabled = 'pot == null'
+        :disabled = 'batch_number == null'
           outlined
           clearable
           dense
@@ -104,12 +104,12 @@
       </v-col>
     </v-row>
     <!-- Dashboard Cards Grid -->
-    <v-row class="ma-10" v-if="pot == null" align="center">
+    <v-row class="ma-10" v-if="batch_number == null" align="center">
       <v-col align="center">
         <v-text class="headline">NO POT SELECTED</v-text>
       </v-col>
     </v-row>
-    <v-row v-else-if="pot != null" align="center">
+    <v-row v-else-if="batch_number != null" align="center">
       <v-col align="center" v-if="potDataLoading">
         <v-progress-circular indeterminate color="success" size="50"/>
       </v-col>
@@ -157,30 +157,30 @@ export default {
       return [
         { title: "How many people can the money an individual, that has already been lucky, contributes a day reach (paid) to?", icon:"mdi-pot", countItems: this.q0},
         { title: "How many people can the money all individual(s), that has already been lucky, contribute a day reach (paid) to?", icon:"mdi-pot", countItems: this.q1},
-        { title: "How many people can the money an individual, that is yet to be lucky, contributes a day reach (paid) to?", icon:"mdi-pot", countItems: (this.siteSettings.dcb/this.stillToWinMembers.length/this.siteSettings.dwa).toExponential(3)},
-        { title: "How many people can the money all individual(s), that is yet to be lucky, contribute a day reach (paid) to?", icon:"mdi-pot", countItems: (((parseInt(this.siteSettings.dcb) * this.stillToWinMembers.length)/this.stillToWinMembers.length)/parseInt(this.siteSettings.dwa)).toExponential(3)},
-        { title: "How many people can the money all individual(s) contribute a day reach (paid) to?", icon:"mdi-pot", countItems: ((((parseInt(this.siteSettings.dcb) * this.stillToWinMembers.length) + (parseInt(this.siteSettings.dca) * this.winnerMembers.length))/this.stillToWinMembers.length)/parseInt(this.siteSettings.dwa)).toExponential(3)},
+        { title: "How many people can the money an individual, that is yet to be lucky, contributes a day reach (paid) to?", icon:"mdi-pot", countItems: (this.siteSettings.deposit_contribution_before/this.stillToWinMembers.length/this.siteSettings.daily_win_amount).toExponential(3)},
+        { title: "How many people can the money all individual(s), that is yet to be lucky, contribute a day reach (paid) to?", icon:"mdi-pot", countItems: (((parseInt(this.siteSettings.deposit_contribution_before) * this.stillToWinMembers.length)/this.stillToWinMembers.length)/parseInt(this.siteSettings.daily_win_amount)).toExponential(3)},
+        { title: "How many people can the money all individual(s) contribute a day reach (paid) to?", icon:"mdi-pot", countItems: ((((parseInt(this.siteSettings.deposit_contribution_before) * this.stillToWinMembers.length) + (parseInt(this.siteSettings.deposit_contribution_after) * this.winnerMembers.length))/this.stillToWinMembers.length)/parseInt(this.siteSettings.daily_win_amount)).toExponential(3)},
         { title: "How many days left to finish?", icon:"mdi-account", countItems: (this.stillToWinMembers.length/parseInt(this.siteSettings.dnw).toExponential(3)) },
-        { title: "How much money left to finish?", icon:"mdi-account", countItems: (this.stillToWinMembers.length * parseInt(this.siteSettings.dwa)).toExponential(3) },
+        { title: "How much money left to finish?", icon:"mdi-account", countItems: (this.stillToWinMembers.length * parseInt(this.siteSettings.daily_win_amount)).toExponential(3) },
         { title: "How much money collected so far from contribution?", icon:"mdi-account", countItems: this.totalDepositPerPot},
-        { title: "How much money payed so far for those who got lucky?", icon:"mdi-account", countItems: this.winnerMembers.length * parseInt(this.siteSettings.dwa) },
+        { title: "How much money payed so far for those who got lucky?", icon:"mdi-account", countItems: this.winnerMembers.length * parseInt(this.siteSettings.daily_win_amount) },
         
       ];
     },
     specificMemberCards() {
       const cards = [
-        { won:false, title: "How many days left until this individual gets lucky?", icon:"mdi-pot", countItems: ((parseInt(this.siteSettings.dwa) - this.selectedMemberBeforeDeposit)/this.siteSettings.dcb).toExponential(3)},
-        { won:false, title: "How much money this individual must pay to get lucky?", icon:"mdi-pot", countItems: (parseInt(this.siteSettings.dwa) - this.selectedMemberBeforeDeposit).toExponential(3)},
-        { won:true, title: "How many days has this individual been contributing before getting lucky?", icon:"mdi-pot", countItems: (this.selectedMemberBeforeDeposit/this.siteSettings.dcb).toExponential(3)},
+        { won:false, title: "How many days left until this individual gets lucky?", icon:"mdi-pot", countItems: ((parseInt(this.siteSettings.daily_win_amount) - this.selectedMemberBeforeDeposit)/this.siteSettings.deposit_contribution_before).toExponential(3)},
+        { won:false, title: "How much money this individual must pay to get lucky?", icon:"mdi-pot", countItems: (parseInt(this.siteSettings.daily_win_amount) - this.selectedMemberBeforeDeposit).toExponential(3)},
+        { won:true, title: "How many days has this individual been contributing before getting lucky?", icon:"mdi-pot", countItems: (this.selectedMemberBeforeDeposit/this.siteSettings.deposit_contribution_before).toExponential(3)},
         { won:true, title: "How much money has this individual contributed before getting lucky?", icon:"mdi-pot", countItems: this.selectedMemberBeforeDeposit},
-        { won:true, title: "How many days has this individual left to finish contributing after getting lucky?", icon:"mdi-pot", countItems: ((parseInt(this.siteSettings.dwa) - this.selectedMemberTotalDeposit)/this.siteSettings.dca).toExponential(3)},
-        { won:true, title: "How much money is this individual left to finish contributing after getting lucky?", icon:"mdi-account", countItems: parseInt(this.siteSettings.dwa) - this.selectedMemberTotalDeposit },
+        { won:true, title: "How many days has this individual left to finish contributing after getting lucky?", icon:"mdi-pot", countItems: ((parseInt(this.siteSettings.daily_win_amount) - this.selectedMemberTotalDeposit)/this.siteSettings.deposit_contribution_after).toExponential(3)},
+        { won:true, title: "How much money is this individual left to finish contributing after getting lucky?", icon:"mdi-account", countItems: parseInt(this.siteSettings.daily_win_amount) - this.selectedMemberTotalDeposit },
       ];
       return cards.filter(card=> card.won == this.selectedMember.won)
     }
   },
   watch: {
-    pot: 'fetchDataForSelectedPot',
+    batch_number: 'fetchDataForSelectedPot',
     member: 'fetchDataForSelectedMember',
 
   },
@@ -202,7 +202,7 @@ export default {
       // specificShared: 0,
       days: 0,
       potDataLoading: false,
-      pot:null,
+      batch_number:null,
       member:null,
       company:null,
       duration: "Daily",
@@ -227,7 +227,7 @@ export default {
       siteSettings:null,
       lottoSettings:[],
       durationOptions:['Daily','Weekly','Monthly'],
-      database: firebase.database(),
+      // database: firebase.database(),
       generating : false,
       viewGeneratedReport: false,
       currentUser:null,
@@ -239,10 +239,13 @@ export default {
   mounted(){
     
     const token = localStorage.getItem('token');
-    if (token) {
+    const settingToken = localStorage.getItem('settings');
+    if (token && settingToken) {
       // Decode the JWT token to extract user information
       const decodedToken = jwt.decode(token);
-      if (decodedToken) {
+      this.siteSettings = JSON.parse(settingToken)
+      console.log(this.siteSettings);
+      if (decodedToken && this.siteSettings) {
         // this.$store.dispatch('auth/login', decodedToken);
         this.currentUser = decodedToken
         if (decodedToken.role == 'Admin') {
@@ -251,7 +254,19 @@ export default {
         else{
           this.userHasPermission = false
         }
-        this.checkUserHasPermission
+        
+        if (this.siteSettings.batch_amount) {
+            for (let index = 1; index < parseInt(this.siteSettings.batch_amount)+1; index++) {
+                this.potOptions.push(index)
+            }
+            console.log(this.potOptions);
+        }
+        else{
+            console.log("pots unavailable");
+        }
+        this.fetchMembers()
+        this.fetchDeposits()
+
       } else {
         console.log('Invalid JWT token.');
         this.$store.dispatch('auth/logout')
@@ -260,165 +275,73 @@ export default {
       console.log('JWT token not found.');
       this.$store.dispatch('auth/logout')
     }
-    if (this.userHasPermission) {
-      
-    }
-    firebase.auth().onAuthStateChanged(async user => {
-      this.currentUser = user
-      const database = firebase.database();
-      if(this.currentUser){
-        const currentUserEmail = this.currentUser.email;
-
-        const sanitizedEmail = currentUserEmail.replace('@', '').replace('.', '');
-
-        // Construct the path to the user in the "Users" database based on their UID
-        const userPath = 'Users/' + sanitizedEmail;
-        // Fetch the user permissions from the constructed path
-        database.ref(userPath).on('value', (snapshot) => {
-          // alert(snapshot.val())
-          const userPermissions = snapshot.val().role;
-          // alert(userPermissions);
-          this.userRole = userPermissions;
-          // alert(userPermissions);
-          if (userPermissions == "Admin") {
-            this.userHasPermission = true;
-            // alert(this.userHasPermission)
-          } else {
-            this.userHasPermission = false;
-            // this.pot = sanitizedEmail
-            // this.company = snapshot.val().company
-          }
-        })
-        if (!this.userHasPermission) {
-          database.ref('Members').orderByChild('pot').on('value',snapshot=>{
-            this.totalMember = 0, 
-              this.originalMemberOptions = []
-            snapshot.forEach(element => {
-              database.ref('Members').child(element.key).child('Deposit').once('value',snap=>{
-                if (snap.exists()) {
-                  snap.forEach(deposit => {
-                    const newDeposit = {
-                      pot: element.val().pot,
-                      amount: deposit.val().amount,
-                    };
-                    this.deposits.push(newDeposit)
-
-                  })
-                  
-                }
-              })
-              // if (this.userHasPermission) {
-
-                this.originalMemberOptions.push(element.val());
-              // }
-              this.totalMembers = this.totalMembers + 1
-            });
-            console.log("Member fetched");
-          })
-          
-        }
-
-      }
-      this.fetchSiteSettings()
-      this.fetchLottoSettings()
-      // this.fetchPots()
-      // this.fetchMember()
-
-      // alert(this.userHasPermission)
-    })
-    // console.log(this.userHasPermission),
-    // alert(this.userHasPermission)
-
-
   },
   
   methods:{
-    
+
     async fetchMembers(){
-      this.loading = true;
-      try {
-          const response = await fetch(`http://localhost:3006/fetchMembers`, {
-          // const response = await fetch(`${this.siteSettingsValues.su}/generate-users`, {
-              method: 'GET',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-          })
-          // if (response.status == 100) {
-              
-          // }
-          if (!response.ok) {
-              throw new Error(`HTTP error! Status: ${response.status}`);
-          }
+            this.loading = true;
+            try {
+                const response = await fetch(`${this.siteSettings.server_url}/fetchMembers`, {
+                // const response = await fetch(`${this.siteSettingsValues.su}/fetchMembers`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
 
-          const data = await response.json();
-          // console.log(data.members);
-          this.originalMemberOptions = data.members;
-
-          // this.filteredUser = this.User;
-          // console.log(data);
-          
-          
-      } catch (error) {
-          console.error('Error fetching members:', error);
-          this.setSnackbarMessage(error)
-          // return false
-          
-      }
-      this.loading = false;
-  },
+                const data = await response.json();
+                this.originalMemberOptions = data.members;
+                this.totalMembers = this.originalMemberOptions.length                
+                
+            } catch (error) {
+                console.error('Error fetching members:', error);
+                this.setSnackbarMessage(error)
+                // return false
+                
+            }
+            // this.loading = false;
+        },
     async fetchDeposits(){
-      this.loading = true;
-      try {
-          const response = await fetch(`http://localhost:3006/fetchDeposits`, {
-          // const response = await fetch(`${this.siteSettingsValues.su}/generate-users`, {
-              method: 'GET',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-          })
-          // if (response.status == 100) {
-              
-          // }
-          if (!response.ok) {
-              throw new Error(`HTTP error! Status: ${response.status}`);
-          }
+            this.loading = true;
+            try {
+                const response = await fetch(`${this.siteSettings.server_url}/fetchDeposits`, {
+                // const response = await fetch(`${this.siteSettingsValues.su}/fetchMembers`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
 
-          const data = await response.json();
-          // console.log(data.Deposits);
-          this.deposits = data.deposits;
-          
-          
-      } catch (error) {
-          console.error('Error fetching Deposits:', error);
-          this.setSnackbarMessage(error)
-          // return false
-          
-      }
-      this.loading = false;
-    },
+                const data = await response.json();
+              // console.log(data.Deposits);
+              this.deposits = data.deposits;               
+                
+            } catch (error) {
+                console.error('Error fetching members:', error);
+                this.setSnackbarMessage(error)
+                // return false
+                
+            }
+            this.loading = false;
+        },
     
     fetchDataForSelectedMember(){
       
       if (this.originalMemberOptions.length != 0) {
-        this.selectedMember = this.originalMemberOptions.filter(newMember => newMember.id == this.member && newMember.pot == this.pot)[0]
+        this.selectedMember = this.originalMemberOptions.filter(newMember => newMember.id == this.member && newMember.batch_number == this.batch_number)[0]
         console.log(this.selectedMember);
         if (this.selectedMember != null) {
           this.winStatus = this.selectedMember.won
+          this.selectedMemberDeposit = this.deposits.filter(deposit => deposit.deposited_for === this.selectedMember.id)
+          
         
-          firebase.database().ref('Members').child(this.selectedMember.id).child('Deposit').once('value',snap=>{
-            if (snap.exists()) {
-              snap.forEach(deposit => {
-                const newDeposit = {
-                  status: deposit.val().status,
-                  amount: deposit.val().amount,
-                };
-                this.selectedMemberDeposit.push(newDeposit)
-
-              })
-              
-            }
-          })
           if (this.selectedMemberDeposit.length != 0) {
             this.selectedMemberDeposit.forEach(element => {
               this.selectedMemberTotalDeposit = this.selectedMemberTotalDeposit + parseInt(element.amount)
@@ -445,23 +368,30 @@ export default {
       // Filter membersOptions based on the selected pot
       if (this.originalMemberOptions.length != 0) {
         this.memberOptions = this.originalMemberOptions
-          .filter(sale => sale.pot === this.pot)
+          .filter(sale => sale.batch_number === this.batch_number)
           .map(sale => ({
             text: `${sale.name} (${sale.age})`,
             value: sale.id,
           }));
         this.filteredDeposits = this.deposits
-          .filter(deposit => deposit.pot === this.pot)
+          .filter(deposit => deposit.batch_number == this.batch_number)
           this.filteredDeposits.forEach(element => {
             this.totalDepositPerPot = this.totalDepositPerPot + parseInt(element.amount)
           });
+          // this.totalDepositPerPot = this.deposits
+          // .filter(deposit => deposit.batch_number === this.batch_number)
+          // .reduce((total, obj) => total + obj.amount, 0);
+
+          console.log(this.totalDepositPerPot);
+          console.log(this.batch_number);
+          console.log(this.deposits[0].batch_number);
         this.winnerMembers = this.originalMemberOptions
-          .filter(sale => sale.pot === this.pot && sale.won == true)
+          .filter(sale => sale.batch_number === this.batch_number && sale.won == true)
         this.stillToWinMembers = this.originalMemberOptions
-          .filter(sale => sale.pot === this.pot && sale.won != true)
-          console.log((this.siteSettings.dca)/this.stillToWinMembers.length);
-        this.q0 = (this.siteSettings.dca/(this.stillToWinMembers.length * this.siteSettings.dwa)).toExponential(3)
-        this.q1 = ((parseInt(this.siteSettings.dca) * this.winnerMembers.length)/(this.stillToWinMembers.length) * parseInt(this.siteSettings.dwa)).toExponential(3)
+          .filter(sale => sale.batch_number === this.batch_number && sale.won != true)
+          console.log((this.siteSettings.deposit_contribution_after)/this.stillToWinMembers.length);
+        this.q0 = (this.siteSettings.deposit_contribution_after/(this.stillToWinMembers.length * this.siteSettings.daily_win_amount)).toExponential(3)
+        this.q1 = ((parseInt(this.siteSettings.deposit_contribution_after) * this.winnerMembers.length)/(this.stillToWinMembers.length) * parseInt(this.siteSettings.daily_win_amount)).toExponential(3)
       }
       // Replace this with your actual logic
       // console.log(`Fetching data for pot: ${this.filteredDeposits[0].amount}`);
@@ -475,7 +405,7 @@ export default {
       this.viewGeneratedReport = false
       this.specificReportResponse = null
       if (this.userHasPermission) {
-        this.pot = null
+        this.batch_number = null
       }
       // this.pot = null
       this.selectedMember = null
@@ -494,10 +424,9 @@ export default {
     exportToExcel(generatedReport) {
       // Prepare data for export (use filteredUser instead of User)
       const data = generatedReport.map(User => ({
-        "Phone Number":`+251${User.PhoneNumber}`,
-        Member: User.MemberName,
-        Company: User.company,
-        Pot: User.pot,
+        "Phone Number":`+251${User.phone}`,
+        Member: User.name,
+        Pot: User.batch_number,
         Date: User.date,
         Status: User.status.toUpperCase(),
       }));
@@ -536,45 +465,34 @@ export default {
       return format(new Date(timestamp), 'MMMddyyyy');
     },
 
-    fetchSiteSettings(){
-      this.siteSettings = []
-      this.database.ref('Settings/SiteSetting').once('value',snapshot=>{
-        if (snapshot.exists()) {
-          this.siteSettings = snapshot.val()
-          this.numberOfPots = parseInt(this.siteSettings.pot)
-        }
-        this.fetchPots()
-        // snapshot.forEach(element => {
-        //   this.siteSettings.push(element.val())
-        // });
-        console.log("Site Settings fetched");
-        // this.loading = false
-      })
-    },
-    fetchLottoSettings(){
-      this.lottoSettings = []
-      this.database.ref('Settings/LottoSetting').once('value',snapshot=>{
-        snapshot.forEach(element => {
-          const elementVal = element.val();
-          elementVal.pot = element.key
-          this.lottoSettings.push(elementVal)
-        });
-        console.log("Lotto Settings fetched");
-        console.log(this.lottoSettings);
-        // this.loading = false
-      })
-    },
-
-    fetchPots(){
-      // alert(this.numberOfPots)
-      if (this.numberOfPots != 0) {
-        for (let i = 1; i < this.numberOfPots + 1; i++) {
-          const element = `Pot ${i}`;
-          this.potOptions.push(element)
-          
-        }
-      }
-    },
+    // fetchSiteSettings(){
+    //   this.siteSettings = []
+    //   this.database.ref('Settings/SiteSetting').once('value',snapshot=>{
+    //     if (snapshot.exists()) {
+    //       this.siteSettings = snapshot.val()
+    //       this.numberOfPots = parseInt(this.siteSettings.pot)
+    //     }
+    //     this.fetchPots()
+    //     // snapshot.forEach(element => {
+    //     //   this.siteSettings.push(element.val())
+    //     // });
+    //     console.log("Site Settings fetched");
+    //     // this.loading = false
+    //   })
+    // },
+    // fetchLottoSettings(){
+    //   this.lottoSettings = []
+    //   this.database.ref('Settings/LottoSetting').once('value',snapshot=>{
+    //     snapshot.forEach(element => {
+    //       const elementVal = element.val();
+    //       elementVal.pot = element.key
+    //       this.lottoSettings.push(elementVal)
+    //     });
+    //     console.log("Lotto Settings fetched");
+    //     console.log(this.lottoSettings);
+    //     // this.loading = false
+    //   })
+    // },
   }}
 
 </script>

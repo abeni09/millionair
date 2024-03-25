@@ -351,8 +351,8 @@ export default {
         }
         if (settingToken) {
             this.server_url = settingToken  
-            this.fetchMembers()     
-            // this.loading = false        
+            // this.fetchMembers()     
+            this.loading = false        
         } else {
             console.log('Invalid setting token.');
             this.$store.dispatch('auth/logout')
@@ -887,7 +887,7 @@ export default {
         async fetchMembers(){
             this.loading = true;
             try {
-                const response = await fetch(`http://localhost:3006/fetchMembers`, {
+                const response = await fetch(`${this.server_url}/fetchMembers`, {
                 // const response = await fetch(`${this.siteSettingsValues.su}/fetchMembers`, {
                     method: 'GET',
                     headers: {

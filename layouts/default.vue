@@ -138,6 +138,9 @@
             if (data.settings != null) {
               localStorage.setItem('serverURL', data.settings.server_url)
               localStorage.setItem('pots', data.settings.batch_amount)
+              localStorage.setItem('settings', JSON.stringify(data.settings))
+              // console.log(localStorage.getItem('pots'));
+              // console.log(JSON.parse(localStorage.getItem('settings')).batch_amount);
             }
             
         } catch (error) {
