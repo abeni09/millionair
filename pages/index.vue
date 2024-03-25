@@ -240,11 +240,12 @@ export default {
     
     const token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
+    console.log(settingToken);
+    console.log(token);
     if (token && settingToken) {
       // Decode the JWT token to extract user information
       const decodedToken = jwt.decode(token);
       this.siteSettings = JSON.parse(settingToken)
-      console.log(this.siteSettings);
       if (decodedToken && this.siteSettings) {
         // this.$store.dispatch('auth/login', decodedToken);
         this.currentUser = decodedToken
