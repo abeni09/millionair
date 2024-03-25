@@ -318,13 +318,14 @@ export default {
     async mounted() {
         
     const token = localStorage.getItem('token');
-    const settingToken = localStorage.getItem('serverURL');
-    const pots = localStorage.getItem('pots');
+    const settingToken = localStorage.getItem('settings');
+    // const pots = localStorage.getItem('pots');
     if (token) {
       // Decode the JWT token to extract user information
       const decodedToken = jwt.decode(token);
+      this.siteSettingsValues = JSON.parse(settingToken)
     //   const settingToken = jwt.decode(siteSettings);
-      console.log(settingToken);
+    //   console.log(settingToken);
       if (decodedToken) {
         // this.$store.dispatch('auth/login', decodedToken);
         this.currentUser = decodedToken
@@ -340,8 +341,8 @@ export default {
         //     this.$router.push('/')
         // }
         // else{
-        if (pots) {
-            for (let index = 1; index < parseInt(pots)+1; index++) {
+        if (this.siteSettingsValues.batch_amount) {
+            for (let index = 1; index < parseInt(this.siteSettingsValues.batch_amount)+1; index++) {
                 this.potOptions.push(index)
             }
             console.log(this.potOptions);
@@ -349,8 +350,8 @@ export default {
         else{
             console.log("pots unavailable");
         }
-        if (settingToken) {
-            this.server_url = settingToken  
+        if (this.siteSettingsValues.server_url) {
+            this.server_url = this.siteSettingsValues.server_url  
             // this.fetchMembers()     
             this.loading = false        
         } else {
@@ -371,6 +372,7 @@ export default {
     },
     data() {
         return {
+            siteSettingsValues: null,
             server_url: null,
             loadingMore: false,
             batch_number:1,

@@ -155,12 +155,13 @@ export default {
   mounted() {
     
     const token = localStorage.getItem('token');
-    const settingToken = localStorage.getItem('serverURL');
+    const settingToken = localStorage.getItem('settings');
     if (token) {
       // Decode the JWT token to extract user information
       const decodedToken = jwt.decode(token);
+      this.siteSettingsValues = JSON.parse(settingToken)
     //   const settingToken = jwt.decode(siteSettings);
-      console.log(settingToken);
+    //   console.log(settingToken);
       if (decodedToken) {
         // this.$store.dispatch('auth/login', decodedToken);
         this.currentUser = decodedToken
@@ -175,8 +176,8 @@ export default {
             this.$router.push('/')
         }
         else{
-            if (settingToken) {
-                this.server_url = settingToken  
+            if (this.siteSettingsValues.server_url) {
+                this.server_url = this.siteSettingsValues.server_url  
                 this.fetchUsers()
                 this.loading = false              
             } else {
@@ -197,6 +198,7 @@ export default {
   },
   data() {
       return {
+        siteSettingsValues: null,
         server_url: null,
         showSupervisorSelect:false,
         currentUser:null,
@@ -307,22 +309,12 @@ export default {
       editUser(User) {
           this.editUserMode = true;
         //   alert(User.company)
-          this.newUser.name = User.name;
-          this.newUser.email = User.email;
-          this.newUser.id = User.id;
-          this.newUser.role = User.role;
-          if(this.newUser.role == "Supervisor"){
+            this.newUser.name = User.name;
+            this.newUser.email = User.email;
+            this.newUser.id = User.id;
+            this.newUser.role = User.role;
             this.newUser.phone = User.phone;
-            this.showSupervisorSelect = true
-
-          }
-          else if(this.newUser.role == "Admin"){
-            this.newUser.phone = null;
-            this.newUser.location = null;
-            this.showSupervisorSelect = false
-
-          }
-          this.showUserForm();
+            this.showUserForm();
           // alert(User.id)
       },
 
