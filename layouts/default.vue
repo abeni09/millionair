@@ -139,12 +139,13 @@
               localStorage.setItem('serverURL', data.settings.server_url)
               localStorage.setItem('pots', data.settings.batch_amount)
               localStorage.setItem('settings', JSON.stringify(data.settings))
+              // this.$router.go()
               // console.log(localStorage.getItem('pots'));
               // console.log(JSON.parse(localStorage.getItem('settings')).batch_amount);
             }
             
         } catch (error) {
-            console.error('Error fetching members:', error);
+            console.error('Error fetching site settings:', error);
             this.setSnackbarMessage(error)
             // return false
             
@@ -222,6 +223,7 @@
 
 
     mounted(){
+      this.fetchSiteSettings()
       // console.log(this.$cookies);
       
       // Access the JWT token from cookies or localStorage
@@ -244,10 +246,9 @@
           
           // if (!server_url || !pots) {
           //   console.log("no site settings found");
-          this.fetchSiteSettings();
-          if (!settingToken) {
-            this.$router.go()
-          }
+          // if (!settingToken) {
+          //   this.fetchSiteSettings();
+          // }
             
           // }
           // else{
