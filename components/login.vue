@@ -186,7 +186,7 @@
           this.loading = true;
   
           try {
-            const response = await fetch('http://localhost:3006/loginStaff', {
+            const response = await fetch('http://78.46.175.135:3006/loginStaff', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
