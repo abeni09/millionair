@@ -227,8 +227,8 @@
       // Access the JWT token from cookies or localStorage
       // const token = this.$cookies.get('token');
       const token = localStorage.getItem('token');
-      const server_url = localStorage.getItem('serverURL');
-      const pots = localStorage.getItem('pots');
+      const settingToken = localStorage.getItem('settings');
+      // const pots = localStorage.getItem('pots');
       if (token) {
         // Decode the JWT token to extract user information
         const decodedToken = jwt.decode(token);
@@ -245,6 +245,9 @@
           // if (!server_url || !pots) {
           //   console.log("no site settings found");
           this.fetchSiteSettings();
+          if (!settingToken) {
+            this.$router.go()
+          }
             
           // }
           // else{

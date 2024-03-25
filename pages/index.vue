@@ -270,11 +270,15 @@ export default {
 
       } else {
         console.log('Invalid JWT token.');
-        this.$store.dispatch('auth/logout')
+        if (!decodedToken) {
+          this.$store.dispatch('auth/logout')          
+        }
       }
     } else {
       console.log('JWT token not found.');
-      this.$store.dispatch('auth/logout')
+      if (!token) {
+        this.$store.dispatch('auth/logout')          
+      }
     }
   },
   
