@@ -418,7 +418,7 @@ export default {
             this.proPicUploadStarted = true
             const formData = new FormData();
             formData.append('image', file); // 'file' is the selected image file
-            await fetch(`http://localhost:3006/upload`, {
+            await fetch(`http://78.46.175.135:3006/upload`, {
                 method: 'POST',
                 body: formData
             })
