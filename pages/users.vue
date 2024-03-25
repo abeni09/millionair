@@ -1,5 +1,21 @@
 <template>
   <div v-if="userHasPermission">
+        <v-snackbar
+        v-model="snackbar"
+        :timeout="timeout"  
+        >
+        {{ snackBarText }}
+
+            <template v-slot:actions>
+                <v-btn
+                color="pink"
+                variant="text"
+                @click="snackbar = false"
+                >
+                Close
+                </v-btn>
+            </template>
+        </v-snackbar>
       <div style="display: flex; margin: auto" class="my-5" >
         <v-row>
             <v-col align = "center" 
@@ -69,9 +85,8 @@
                                   :rules="[rules.required]" outlined dense v-model="newUser.name" label="Name" required></v-text-field>
                       <v-text-field 
                                   :rules="[rules.required, rules.email]" outlined dense v-model="newUser.email" label="Email" required></v-text-field>
-                      <!-- <v-text-field 
-                          v-if="showSupervisorSelect"
-                                  :rules="[rules.required]" outlined dense v-model="newUser.phone" label="Phone" required></v-text-field> -->
+                      <v-text-field 
+                                  :rules="[rules.required]" outlined dense v-model="newUser.phone" label="Phone" required></v-text-field>
                       <!-- <v-text-field 
                                   :rules="[rules.required]" outlined dense v-model="newUser.company" label="Max Competitors" required></v-text-field> -->
                       <!-- <v-text-field 
@@ -198,6 +213,9 @@ export default {
   },
   data() {
       return {
+        snackBarText:'',
+        timeout: 2000,
+        snackbar:false,
         siteSettingsValues: null,
         server_url: null,
         showSupervisorSelect:false,
@@ -296,6 +314,10 @@ export default {
             }
             this.loading = false;
         },
+        setSnackbarMessage(_value){
+            this.snackbar = true;
+            this.snackBarText = _value
+        },  
     
     handleRoleChange() {
       // Show Supervisor v-select only when the selected role is "Sales"
@@ -348,33 +370,58 @@ export default {
           this.$refs.UserForm.reset();
           this.editUserMode = false;
       },
+        saveUser() {
+            if (this.$refs.UserForm.validate()) {
+                const userData = this.editUserMode ? this.getUpdatedUserData() : this.getNewUserData();
 
-      saveUser() {
-          if (this.$refs.UserForm.validate()) {
-              const database = firebase.database();
-
-              if (this.editUserMode) {
-              const updatedUserData = {
-                  name: this.newUser.name,
-                  phone: this.newUser.phone,
-                  email: this.newUser.email,
-                  role: this.newUser.role,
-                  updatedAt: Date.now(),
-                  updatedBy: this.currentUser.userId,
-              };
-
-              } else {
-              const newUserData = {
-                  name: this.newUser.name,
-                  phone: this.newUser.phone,
-                  email: this.newUser.email.toLowerCase(),
-                  role: this.newUser.role,
-                  addedAt: Date.now(),
-                  addedBy: this.currentUser.uid,
-              };
-              }
-          }
-      },
+                // Perform POST request using fetch
+                // fetch(`${this.server_url}/saveUser`, {
+                fetch(`http://localhost:3006/saveUser`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({userData : userData, edit: this.editUserMode, memberId: this.newUser.id})
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(response.message);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('User saved successfully:', data);
+                    this.setSnackbarMessage(data.message)
+                    this.closeUserForm();
+                    // Handle success if needed
+                })
+                .catch(error => {
+                    console.error('Error saving user:', error.message);
+                    this.setSnackbarMessage(error.message)
+                    // Handle error if needed
+                });
+            }
+        },
+        getUpdatedUserData() {
+            return {
+                name: this.newUser.name,
+                phone: this.newUser.phone,
+                email: this.newUser.email,
+                role: this.newUser.role,
+                updatedAt: Date.now(),
+                updatedBy: this.currentUser.userId,
+            };
+        },
+        getNewUserData() {
+            return {
+                name: this.newUser.name,
+                phone: this.newUser.phone,
+                email: this.newUser.email.toLowerCase(),
+                role: this.newUser.role,
+                addedAt: Date.now(),
+                addedBy: this.currentUser.userId
+            };
+        },
 
       confirmDeleteUser(User) {
           this.UserToDelete = User;

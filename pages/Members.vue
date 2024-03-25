@@ -457,8 +457,6 @@ export default {
             selectedMember: null,
             memberFields: {
                 won: 'Won',
-                // winAmount: 'Win Amount',
-                // winDate: 'Win Date',
                 batch_number: 'Batch',
                 name: 'Name',
                 email: 'Email',
@@ -468,7 +466,7 @@ export default {
                 city: 'City',
                 subcity: 'Subcity',
                 woreda: 'Woreda',
-                respondentName: 'Respondent',
+                respondent_ame: 'Respondent',
                 respondent_phone: 'Respondent Phone',
                 respondent_relation: 'Respondent Relation',
                 heir_name: 'Heir',
