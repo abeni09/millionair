@@ -621,9 +621,6 @@ export default {
         deleteUser(User) {
             this.confirmDeleteUser(User);
         },
-        verifyUser(User) {
-            this.confirmVerifyUser(User);
-        },
 
         showAddUserForm() {
             // this.$refs.UserForm.reset();
@@ -925,9 +922,11 @@ export default {
                     },
                     body: JSON.stringify({userData : userData, edit: this.editUserMode, memberId: this.newUser.id})
                 })
-                .then(response => {
+                .then(async response => {
                     if (!response.ok) {
-                        throw new Error(response.message);
+                        const finalResponse = await response.json()
+                        console.log(finalResponse);
+                        throw new Error(finalResponse.message);
                     }
                     return response.json();
                 })
@@ -1000,33 +999,32 @@ export default {
             this.UserToDelete = User;
             this.confirmDeleteDialog = true;
         },
-        confirmVerifyUser(User) {
-            this.UserToVerify = User
-            this.confirmVerifyDialog = true;
-        },
 
         async confirmDelete() {
-            try {
-                const response = await fetch(`${this.server_url}/deleteMember/${this.UserToDelete.id}`, {
-                    method: 'DELETE'
-                });
+            if (UserToDelete) {
+                try {
+                    const response = await fetch(`${this.server_url}/deleteMember/${this.UserToDelete.id}`, {
+                        method: 'DELETE'
+                    });
 
-                if (!response.ok) {
-                    throw new Error('Failed to delete member');
+                    if (!response.ok) {
+                        throw new Error('Failed to delete member');
+                    }
+
+                    const data = await response.json();
+                    console.log('Member deleted successfully:', data.message);
+                    this.setSnackbarMessage(data.message)
+                    this.confirmDeleteDialog = false;
+                    this.filteredUser = this.User.filter(
+                    (User) => User.id !== this.UserToDelete.id
+                    );
+                    // Handle success if needed
+                } catch (error) {
+                    console.error('Error deleting member:', error.message);
+                    this.setSnackbarMessage(error.message)
+                    // Handle error if needed
                 }
-
-                const data = await response.json();
-                console.log('Member deleted successfully:', data.message);
-                this.setSnackbarMessage(data.message)
-                this.confirmDeleteDialog = false;
-                this.filteredUser = this.User.filter(
-                (User) => User.id !== this.UserToDelete.id
-                );
-                // Handle success if needed
-            } catch (error) {
-                console.error('Error deleting member:', error.message);
-                this.setSnackbarMessage(error.message)
-                // Handle error if needed
+                
             }
         },
         // Function to cancel the delete action

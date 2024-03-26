@@ -223,24 +223,24 @@
     </v-form>
               <div class="mt-5">
                 <VBtn style="background-color: #183D0E; color: #FFC72C;" 
-              :disabled="loading==true || editedItem.drawStarted" v-if="!saving"
+              :disabled="loading==true || editedItem.drawstarted" v-if="!saving"
                @click="save" block min-height="44" class="gradient">
                   Save
                 </VBtn>
                 <v-progress-circular v-if="saving || starping" style="width: 100%; margin: auto; color: #183D0E; " align = "center" indeterminate/>
                                 
                 <v-spacer/>
-                <!-- <VBtn :disabled = "checkDate(editedItem.drawStartedAt,'start')"  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-if="!editedItem.drawStarted && !starping" -->
-                <VBtn class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-if="!editedItem.drawStarted && !starping" :disabled="depositing"
+                <!-- <VBtn :disabled = "checkDate(editedItem.drawstartedat,'start')"  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-if="!editedItem.drawstarted && !starping" -->
+                <VBtn class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-if="!editedItem.drawstarted && !starping" :disabled="depositing"
                @click="startDraw" block min-height="44">
                   Start Draw
                 </VBtn>
-                <!-- <VBtn :disabled = "checkDate(editedItem.drawEndedAt, 'stop')"  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-else-if="editedItem.drawStarted && !starping" :disabled="depositing" -->
-                <VBtn class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-else-if="editedItem.drawStarted && !starping" :disabled="depositing"
+                <!-- <VBtn :disabled = "checkDate(editedItem.drawendedat, 'stop')"  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-else-if="editedItem.drawstarted && !starping" :disabled="depositing" -->
+                <VBtn class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-else-if="editedItem.drawstarted && !starping" :disabled="depositing"
                @click="startDraw" block min-height="44">
                   Emergency Stop
                 </VBtn>
-                <!-- <VBtn :disabled = "checkDate(editedItem.drawEndedAt, 'stop')"  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-else-if="editedItem.drawStarted && !starping" -->
+                <!-- <VBtn :disabled = "checkDate(editedItem.drawendedat, 'stop')"  class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" v-else-if="editedItem.drawstarted && !starping" -->
                 <!-- <VBtn class="mt-5 gradient" style="background-color: #183D0E; color: #FFC72C;" :disabled="depositing"
                @click="startSimulation" block min-height="44">
                   Start Simulation
@@ -274,23 +274,21 @@ export default {
   components: {
     ImageUpload
   },
-  watch:{
-      $route(){
-          firebase.database().ref('Settings').off('value')
-          // console.log('Leaving...  ')
-      }
-  },
-  mounted(){
-    
-
+//   watch:{
+//     editedItem.drawstarted(){
         
+//     }
+//   },
+  mounted(){
     const token = localStorage.getItem('token');
-    const settingToken = localStorage.getItem('serverURL');
+    const settingToken = localStorage.getItem('settings');
     if (token) {
       // Decode the JWT token to extract user information
       const decodedToken = jwt.decode(token);
-    //   const settingToken = jwt.decode(siteSettings);
-    //   console.log(settingToken);
+      this.editedItem = JSON.parse(settingToken)
+      console.log(this.editedItem);
+      this.editedItem.drawstarted = JSON.parse(settingToken).drawstarted
+      console.log(this.editedItem);
       if (decodedToken) {
         // this.$store.dispatch('auth/login', decodedToken);
         this.currentUser = decodedToken
@@ -303,7 +301,7 @@ export default {
         if (!this.userHasPermission) {
             this.$router.push('/')
         }
-        else{
+        // else{
         //     if (settingToken) {
         //         // this.editedItem.server_url = settingToken  
             this.fetchSiteSettings()
@@ -314,7 +312,7 @@ export default {
                 
         //     }
 
-        }
+        // }
       } else {
         console.log('Invalid JWT token.');
         this.$store.dispatch('auth/logout')
@@ -350,11 +348,9 @@ export default {
                 }
 
                 const data = await response.json();
-                console.log(data.settings);
                 if (data.settings != null) {
                     this.editedItem = data.settings;
-                    console.log(this.editedItem);
-                    
+                    localStorage.setItem('settings', JSON.stringify(data.settings))
                 }
                 // console.log(data);
                 
@@ -466,19 +462,20 @@ export default {
             this.saving = true;
             // this.editedItem.updated_at = Date.now();
             this.editedItem.updated_at = 'NOW()';
-            this.editedItem.drawstarted = false;
-            console.log(`${this.editedItem.server_url}/updateSiteSettings`);
+            // this.editedItem.drawstarted = false;
             try {
-                const response = await fetch(`${this.editedItem.server_url}/updateSiteSettings`, {
-                // const response = await fetch(`http://localhost:3006/updateSiteSettings`, {
+                // const response = await fetch(`${this.editedItem.server_url}/updateSiteSettings`, {
+                const response = await fetch(`http://localhost:3006/updateSiteSettings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({userId: 1, updatedData: this.editedItem}),
+                    body: JSON.stringify({userId: this.currentUser.userId, updatedData: this.editedItem}),
                 })
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                        const finalResponse = await response.json()
+                        console.log(finalResponse);
+                        throw new Error(finalResponse.message);
                 }
 
                 const data = await response.json();
@@ -498,23 +495,24 @@ export default {
         async startDraw() {
             this.starping = true
             try {
-                const response = await fetch(`${this.editedItem.server_url}/startDraw`, {
-                // const response = await fetch(`http://localhost:3007/startDraw`, {
+                // const response = await fetch(`${this.editedItem.server_url}/startDraw`, {
+                const response = await fetch(`http://localhost:3006/startDraw`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({drawStarted: !this.editedItem.drawStarted}),
+                    body: JSON.stringify({drawstarted: !this.editedItem.drawstarted}),
                 })
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
 
                 const data = await response.json();
-                this.editedItem.drawStarted = true
+                localStorage.setItem('settings', JSON.stringify(data.setting))
+                this.editedItem.drawstarted = !this.editedItem.drawstarted
                 this.setSnackbarMessage(data.message)
                 this.starping = false
-                // console.log(data);
+                console.log(data.setting);
                 
                 
             } catch (error) {
@@ -595,29 +593,29 @@ export default {
      settings: [],
 
     editedItem: {
-        maxmimum_members: 100000,
-        systemStartedAt: null,
-        drawStarted: false,
-        drawEndedAt: null,
-        drawStartedAt: null,
-        site_name: 'Derash',
-        batch_amount: 10,
-        memeber_spin_timeout: 10,
-        draw_timeout: 30,
-        service_fee: 50,
-        deposit_contribution_before: 50,
-        min_deposit_days: 15,
-        max_deposit_days: 30,
-        penality_fee: 80,
-        max_days_to_wait: 15,
-        max_days_to_penalize: 30,
-        deposit_contribution_after: 550,
-        daily_number_of_winners: 5,
-        daily_win_amount: 1000000,
-        copy_right_content: '',
-        server_url: '',
-        about_us:'',
-        image_url:'',
+        maxmimum_members: null,
+        systemstartedat: null,
+        drawstarted: false,
+        drawendedat: null,
+        drawstartedat: null,
+        site_name: null,
+        batch_amount: null,
+        memeber_spin_timeout: null,
+        draw_timeout: null,
+        service_fee: null,
+        deposit_contribution_before: null,
+        min_deposit_days: null,
+        max_deposit_days: null,
+        penality_fee: null,
+        max_days_to_wait: null,
+        max_days_to_penalize: null,
+        deposit_contribution_after: null,
+        daily_number_of_winners: null,
+        daily_win_amount: null,
+        copy_right_content: null,
+        server_url: null,
+        about_us:null,
+        image_url:null,
         updated_at:null,
         updated_by: 1,
     }

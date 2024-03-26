@@ -21,6 +21,7 @@ export const state = () => ({
       // Perform login logic (e.g., authenticate user)
       // Upon successful login, commit the login mutation to update the state
       commit('login', user)
+      console.log(user);
     },
     logout({ commit }) {
       // Perform logout logic (e.g., clear authentication tokens)

@@ -375,17 +375,19 @@ export default {
                 const userData = this.editUserMode ? this.getUpdatedUserData() : this.getNewUserData();
 
                 // Perform POST request using fetch
-                // fetch(`${this.server_url}/saveUser`, {
-                fetch(`http://localhost:3006/saveUser`, {
+                fetch(`${this.server_url}/saveUser`, {
+                // fetch(`http://localhost:3006/saveUser`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({userData : userData, edit: this.editUserMode, memberId: this.newUser.id})
                 })
-                .then(response => {
+                .then(async response => {
                     if (!response.ok) {
-                        throw new Error(response.message);
+                        const finalResponse = await response.json()
+                        console.log(finalResponse);
+                        throw new Error(finalResponse.message);
                     }
                     return response.json();
                 })
@@ -408,8 +410,8 @@ export default {
                 phone: this.newUser.phone,
                 email: this.newUser.email,
                 role: this.newUser.role,
-                updatedAt: Date.now(),
-                updatedBy: this.currentUser.userId,
+                updated_at: Date.now(),
+                updated_by: this.currentUser.userId,
             };
         },
         getNewUserData() {
@@ -418,8 +420,8 @@ export default {
                 phone: this.newUser.phone,
                 email: this.newUser.email.toLowerCase(),
                 role: this.newUser.role,
-                addedAt: Date.now(),
-                addedBy: this.currentUser.userId
+                created_at: Date.now(),
+                created_by: this.currentUser.userId
             };
         },
 
@@ -432,24 +434,31 @@ export default {
           this.confirmCloseDialog = true;
       },
 
-      confirmDelete() {
-          if (this.UserToDelete) {
-              const database = firebase.database();
-              const UserRef = database.ref('Users').child(this.UserToDelete.id);
+    async confirmDelete() {
+        if (this.UserToDelete) {
+            try {
+                const response = await fetch(`${this.server_url}/deleteUser/${this.UserToDelete.id}`, {
+                    method: 'DELETE'
+                });
 
-              UserRef
-              .remove()
-              .then(() => {
-                  //console.log('User deleted from Firebase successfully.');
-                  this.confirmDeleteDialog = false;
-                  this.filteredUser = this.User.filter(
-                  (User) => User.id !== this.UserToDelete.id
-                  );
-              })
-              .catch((error) => {
-                  console.error('Error deleting User from Firebase:', error);
-              });
-          }
+                if (!response.ok) {
+                    throw new Error('Failed to delete user');
+                }
+
+                const data = await response.json();
+                console.log('User deleted successfully:', data.message);
+                this.setSnackbarMessage(data.message)
+                this.confirmDeleteDialog = false;
+                this.filteredUser = this.User.filter(
+                (User) => User.id !== this.UserToDelete.id
+                );
+                // Handle success if needed
+            } catch (error) {
+                console.error('Error deleting user:', error.message);
+                this.setSnackbarMessage(error.message)
+                // Handle error if needed
+            }
+        }
       },
       // Function to cancel the delete action
       cancelDelete() {

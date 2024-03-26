@@ -212,7 +212,7 @@
                 // this.$cookies.set('token', data.token);
                 localStorage.setItem('token', data.token)
                 this.$store.dispatch('auth/login', data.data);
-                this.$router.go()
+                // this.$router.go()
               }
             }
 

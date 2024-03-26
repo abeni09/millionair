@@ -91,6 +91,7 @@
     name: 'DefaultLayout',
     data() {
       return {
+        logToken: null,
         primarycolor: '#183D0E',
         secondarycolor: '#FFC72C',
         siteName:'',
@@ -101,7 +102,7 @@
         clipped: false,
         drawer: true,
         fixed: false,
-        userHasPermission: false,
+        // userHasPermission: false,
         // filteredMenuItems: [],
         items: [],
         imageURL:'',
@@ -192,18 +193,36 @@
             allow: this.userHasPermission
           },
         ];
+      // Reset the items array to trigger reactivity
+        this.items.splice(0, this.items.length, ...this.items);
       },
+      isTokenExpired(tokenData) {
+        if (!tokenData || !tokenData.exp) {
+          return true; // Token is missing expiration information, so consider it expired
+        }
+
+        // Convert expiration timestamp to milliseconds
+        const expirationTime = tokenData.exp * 1000;
+        const currentTime = Date.now();
+        console.log((expirationTime - currentTime)/60000);
+
+        // Compare current time with expiration time
+        return currentTime >= expirationTime;
+      }
     },
     computed: {
-      checkUserHasPermission(){
-        this.updateMenuItems()
-
-      },
       
       
       currentUser() {
         // Check if the user is logged in using Vuex store
         return this.$store.state.auth.user
+        // this.updateMenuItems()
+      },
+      userHasPermission(){
+        if (this.currentUser != null && this.currentUser.role === "Admin") {
+          return true
+        }
+        return false
       },
       
       setTheme() {
@@ -214,15 +233,17 @@
           }
         },
       },
-      // watch: {
-      //   userHasPermission() {
-      //     // alert(newPermission)
-      //     this.updateMenuItems();
-      //   },
-      // },
+      watch: {
+        userHasPermission() {
+          // alert(newPermission)
+          this.updateMenuItems();
+        },
+      },
+
 
 
     mounted(){
+      this.updateMenuItems()
       this.fetchSiteSettings()
       // console.log(this.$cookies);
       
@@ -234,34 +255,22 @@
       if (token) {
         // Decode the JWT token to extract user information
         const decodedToken = jwt.decode(token);
+        this.footerText = JSON.parse(settingToken).copy_right_content
         if (decodedToken) {
-          this.$store.dispatch('auth/login', decodedToken);
-          if (decodedToken.role == 'Admin') {
-            this.userHasPermission = true;
+          if (this.isTokenExpired(decodedToken)) {
+            console.log("token expired");
+            this.$store.dispatch('auth/logout');
+          } else {
+            this.$store.dispatch('auth/login', decodedToken);
+            console.log(decodedToken);
           }
-          else{
-            this.userHasPermission = false
-          }
-          this.checkUserHasPermission
-          
-          // if (!server_url || !pots) {
-          //   console.log("no site settings found");
-          // if (!settingToken) {
-          //   this.fetchSiteSettings();
-          // }
-            
-          // }
-          // else{
-          //   console.log('site settings found');
-          //   // localStorage.removeItem('serverURL')
-          //   console.log(server_url);
-          //   console.log(pots);
-          // }
         } else {
           console.log('Invalid JWT token.');
+          this.$store.dispatch('auth/logout');
         }
       } else {
         console.log('JWT token not found.');
+        this.$store.dispatch('auth/logout');
       }
       
     },
