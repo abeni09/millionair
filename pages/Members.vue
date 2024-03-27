@@ -37,10 +37,11 @@
                 sm="6">
                     <v-text-field dense outlined v-model="search" append-icon="mdi-magnify" label="Search" single-line />
                 </v-col>
-                <v-col align = "center" 
+                <v-col class='mx-5' align = "center" 
                 cols="12"
-                md="3"
-                sm="3">
+                md="2"
+                sm="2">
+                    <!-- <v-btn @click="searchMember" style="background-color: #183D0E; color: #FFC72C;">Search</v-btn> -->
                     <v-btn @click="showUserForm(false)" style="background-color: #183D0E; color: #FFC72C;" v-if="userHasPermission">Add</v-btn>
                     <!-- <v-btn @click="generateUsers" style="background-color: #183D0E; color: #FFC72C;" :disabled = "generating" v-if="!generating">Generate</v-btn>
                     <v-btn @click="generateUsers" style="background-color: #183D0E; color: #FFC72C;" :disabled = "generating" v-else-if="generating">Generating</v-btn> -->
@@ -51,7 +52,6 @@
         <v-data-table :loading="loading"
             :headers="headers"
             :items="filteredUser"
-            :search="search"
             :footer-props="{
             'items-per-page-options': [10, 20, 30],
             'show-current-page': true,
@@ -75,9 +75,9 @@
                 <v-btn fab small inline class="ma-1" @click="displayFullMemberInfo(item)">
                     <v-icon color="blue" >mdi-information</v-icon>
                 </v-btn>
-                <!-- <v-btn fab small inline class="ma-1" v-if="userRole != null && userRole != 'Agent'" @click="depositContribution(item)">
+                <v-btn fab small inline class="ma-1" v-if="userRole != null && userRole != 'Agent'" @click="depositContribution(item)">
                     <v-icon color="green" >mdi-bank</v-icon>
-                </v-btn> -->
+                </v-btn>
                 <!-- <v-btn fab small inline class="ma-1">
                     <v-icon color="blue" @click="addPhoneForMembers(item)">mdi-plus</v-icon>
                 </v-btn> -->
@@ -256,7 +256,7 @@
                             type="number"
                             ></v-text-field>
                             <div style="align-items: center;">
-                                <strong v-if="depositing && !alreadyWon" style="width: 100%; text-align: center;">Generating {{ totalLottoTogenerate }} lotto numbers</strong>
+                                <strong v-if="depositing && !alreadyWon" style="width: 100%; text-align: center;">Generating lotto numbers</strong>
                                 <v-progress-circular v-if="depositing" style="width: 100%; margin: auto; color: #183D0E; " align = "center" indeterminate/>
                                 <v-btn style="background-color: #183D0E; color: #FFC72C; width: 100%;" v-else-if="!depositing" @click="performDeposit">Deposit</v-btn>
                         
@@ -352,7 +352,7 @@ export default {
         }
         if (this.siteSettingsValues.server_url) {
             this.server_url = this.siteSettingsValues.server_url  
-            this.fetchMembers()     
+            // this.fetchMembers()     
             // this.loading = false        
         } else {
             console.log('Invalid setting token.');
@@ -480,10 +480,10 @@ export default {
             // roleOptions: ["Admin", "User", "Supervisor"],
             headers: [
                 { text: 'Name', value: 'name' },
-                { text: 'Phone Number', value: 'phone' },
+                { text: 'Phone', value: 'phone' },
                 { text: 'Age', value: 'age' },
                 { text: 'Gender', value: 'gender' },
-                { text: 'Batch', value: 'batch_number' },
+                { text: 'Batch_number', value: 'batch_number' },
                 { text: 'Added', value: 'addedAt' },
                 { text: '', value: 'actions', sortable: false }
             ],
@@ -533,6 +533,7 @@ export default {
             }
             // min: v => (v && v.length >= 8) || "Min 8 characters",
             },
+            searchTimer: null
         };
     },
     
@@ -543,22 +544,46 @@ export default {
         
       search(newValue) {
         // Check if the search input is empty
-        if (newValue === "") {
-          // If empty, display all User
-          this.filteredUser = this.User;
-        } else {
-          // If not empty, filter the User based on the selected search column
-          this.filteredUser = this.User.filter((student) => {
-            const columnValue = student[this.searchColumn];
-            return (
-              columnValue &&
-              columnValue.toString().toLowerCase().includes(newValue.toString().toLowerCase())
-            );
-          });
+        if (newValue.trim()) {
+            // Clear previous timer
+            clearTimeout(this.searchTimer);
+            // Set a new timer to execute the search function after 2 seconds
+            this.searchTimer = setTimeout(() => {
+                this.fetchSearchResults(newValue, this.searchColumn);
+            }, 2000); // Change delay time as needed (2000 milliseconds = 2 seconds)
+        }
+        else{
+            // Clear previous timer
+            clearTimeout(this.searchTimer);
         }
       },
     },
     methods: { 
+        async fetchSearchResults(keyword, column){
+            try {
+                this.loading = true
+                const response = await fetch(`${this.server_url}/processDeposit`, {
+                // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+                    method: 'GET',
+                })
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                this.User = data.results;
+
+                this.filteredUser = this.User;
+                this.loading = false
+            } catch (error) {
+                console.error('Error updating deposit:', error);
+                this.setSnackbarMessage(error)
+                this.loading = false
+                return false
+                
+            }
+
+        },
         setSnackbarMessage(_value){
             this.snackbar = true;
             this.snackBarText = _value
@@ -580,7 +605,6 @@ export default {
                 
             }
             this.selectedMember = item
-            console.log(this.selectedMember);
             this.depositContributionDialog = true
         },
         formatDate(timestamp) {
@@ -680,49 +704,36 @@ export default {
             // if (lastDate == null) {
             //     lastDate = this.formatDate(Date.now()).toString().replace(',', '').replace(' ','')
             // }
-            const minDD = parseInt(this.siteSettingsValues.mindd)
-            const maxDD = parseInt(this.siteSettingsValues.maxdd)
-            const maxDP = parseInt(this.siteSettingsValues.maxdp)
-            const maxDW = parseInt(this.siteSettingsValues.maxdw)
-            var serviceFee = parseInt(this.siteSettingsValues.sf)
-            const penalityAmount = parseInt(this.siteSettingsValues.apm)
-            
-            const checkStatusRef = firebase.database().ref('Members').child(this.selectedMember.id);
-            checkStatusRef.once('value', snapshot => {
-                if (snapshot.exists()) {
-                    // console.log(this.daysAheadOfToday(lastDate)<(maxDW * -1));
-                    if (this.daysAheadOfToday(lastDate)<(maxDW * -1)) {
-                        this.setSnackbarMessage(`This user has been disallowed to deposit (${maxDW} days passed)`);
-                        this.depositing = false;
-                        return false
-                    }
-                    if (snapshot.val()['won'] == true) {
-                        this.newDeposit.dailyContribution = this.siteSettingsValues.dca
-                        this.alreadyWon = true
-                        if (this.daysAheadOfToday(lastDate) < (maxDP * -1)) {
-                            this.setSnackbarMessage(`This user has been penalized (${maxDP} days passed)`);
-                            this.penalized = true
-                            this.penalizedAmount = penalityAmount * this.daysAheadOfToday(lastDate) * -1
-                        }
-                    } else {
-                        this.newDeposit.dailyContribution = this.siteSettingsValues.dcb
-                        serviceFee = 0
-                        this.alreadyWon = false              
-                    }
-                } 
-                else {
-                    this.newDeposit.dailyContribution = this.siteSettingsValues.dcb
-                    this.alreadyWon = false
-                    this.depositing = false;
-                    this.setSnackbarMessage(`This user does not exist!`);
-                    this.closeMemberInfo()
-                    return false;
-                    // console.log(this.siteSettingsValues.dcb);                
+            const minDD = parseInt(this.siteSettingsValues.min_deposit_days)
+            const maxDD = parseInt(this.siteSettingsValues.max_deposit_days)
+            const maxDP = parseInt(this.siteSettingsValues.max_days_to_penalize)
+            const maxDW = parseInt(this.siteSettingsValues.max_days_to_wait)
+            var serviceFee = parseInt(this.siteSettingsValues.service_fee)
+            const penalityAmount = parseInt(this.siteSettingsValues.penality_fee)
+            // console.log(this.daysAheadOfToday(lastDate)<(maxDW * -1));
+            if (this.daysAheadOfToday(lastDate)<(maxDW * -1)) {
+                this.setSnackbarMessage(`This user has been disallowed to deposit (${maxDW} days passed)`);
+                this.depositing = false;
+                return false
+            }
+            if (this.selectedMember.won == true) {
+                this.newDeposit.dailyContribution = this.siteSettingsValues.deposit_contribution_after
+                this.alreadyWon = true
+                if (this.daysAheadOfToday(lastDate) < (maxDP * -1)) {
+                    this.setSnackbarMessage(`This user has been penalized (${maxDP} days passed)`);
+                    this.penalized = true
+                    this.penalizedAmount = penalityAmount * this.daysAheadOfToday(lastDate) * -1
                 }
-            })
+            } else {
+                this.newDeposit.dailyContribution = this.siteSettingsValues.deposit_contribution_before
+                serviceFee = 0
+                this.alreadyWon = false              
+            }
             if (!this.depositing) {
                 return false
             }
+            console.log(this.newDeposit);
+            console.log(this.siteSettingsValues);
             if (this.newDeposit.dailyContribution != null && this.newDeposit.amount != 0) {
                 const amount = parseInt(this.newDeposit.amount)
                 const dailyContribution = parseInt(this.newDeposit.dailyContribution)
@@ -731,10 +742,6 @@ export default {
                 if (this.alreadyWon) {
                     totalLottoTogenerate = Math.floor((amount - this.penalizedAmount)/(dailyContribution + serviceFee))
                     netAmount = amount - this.penalizedAmount
-                    console.log(totalLottoTogenerate);
-                    console.log(netAmount);
-                    // this.depositing = false
-                    // return false;
                 }
                 if (netAmount % (dailyContribution + serviceFee ) === 0) {
                     console.log('divisibile')
@@ -763,29 +770,8 @@ export default {
                         }
                     }
                     
-                    // Search for an object with rollNumber and currentLottoNumber
-                    let searchedObject = this.lottoSettingsValues.find(obj => obj.batch_number === this.selectedMember.batch_number);
-                    var currentRollNumber = null
-                    var currentLottoNumber = null
-                    if (searchedObject) {
-                        console.log(searchedObject);
-                        currentRollNumber = parseInt(searchedObject.rollNumber)
-                        currentLottoNumber = parseInt(searchedObject.currentLottoNumber)
-                    } else {
-                        console.log('Object not found');
-                        currentRollNumber = 0
-                        currentLottoNumber = 0
-                    }
-                    this.totalLottoTogenerate = totalLottoTogenerate
-                    if (currentRollNumber == currentLottoNumber || this.alreadyWon) {
-                        this.depositing = await this.loopLottoUpdate(this.penalizedAmount, lastDate,totalLottoTogenerate,this.depositingRollNumber,currentRollNumber,this.selectedMember,netAmount - (serviceFee * totalLottoTogenerate),dailyContribution, this.currentUser);
-                        this.closeMemberInfo()
-                    }
-                    else{
-                        console.log('not equal');
-                        this.depositing = false 
-                    }
-
+                    this.depositing = await this.loopLottoUpdate(this.penalizedAmount,this.selectedMember.id,netAmount - (serviceFee * totalLottoTogenerate), this.currentUser.userId);
+                    this.closeMemberInfo()
                 }
                 else{
                     console.log('not divisibile')
@@ -812,31 +798,22 @@ export default {
             }
 
         },
-        async loopLottoUpdate(penalityAmount,lastDate,totalLottoTogenerate,depositingRollNumber,currentRollNumber,selectedMember,amount,dailyContribution, currentUser){
+        async loopLottoUpdate(penalityAmount ,selectedMember, amount, currentUser){
             try {
-                const response = await fetch(`${this.siteSettingsValues.su}/processDeposit`, {
+                const response = await fetch(`${this.server_url}/processDeposit`, {
+                // const response = await fetch(`http://localhost:3006/processDeposit`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(
                         {
-                            winner: this.alreadyWon,
-                            penalityAmount: penalityAmount,
+                            penality: penalityAmount,
                             amount:amount, 
-                            selectedMember:selectedMember, 
-                            currentUser:currentUser, 
-                            // formattedDate:formattedDate,
-                            lastDate:lastDate, 
-                            totalLottoTogenerate:totalLottoTogenerate, 
-                            depositingRollNumber:depositingRollNumber,
-                            currentRollNumber:currentRollNumber, 
-                            dailyContribution:dailyContribution, 
+                            member:selectedMember, 
+                            user:currentUser, 
                         }),
                 })
-                // if (response.status == 100) {
-                    
-                // }
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
@@ -846,9 +823,6 @@ export default {
                 if (data.success) {
                     return false
                 }
-                // console.log(data);
-                
-                
             } catch (error) {
                 console.error('Error updating deposit:', error);
                 this.setSnackbarMessage(error)
@@ -862,11 +836,8 @@ export default {
             this.loading = true;
             try {
                 const response = await fetch(`${this.server_url}/fetchMembers`, {
-                // const response = await fetch(`${this.siteSettingsValues.su}/fetchMembers`, {
+                // const response = await fetch(`http://localhost:3006/fetchMembers`, {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                 })
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -876,7 +847,6 @@ export default {
                 this.User = data.members;
 
                 this.filteredUser = this.User;
-                console.log(this.filteredUser[0]);
                 
                 
             } catch (error) {
