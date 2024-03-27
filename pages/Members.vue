@@ -41,7 +41,7 @@
                 cols="12"
                 md="3"
                 sm="3">
-                    <v-btn @click="showAddForm" style="background-color: #183D0E; color: #FFC72C;" v-if="userHasPermission">Add</v-btn>
+                    <v-btn @click="showUserForm(false)" style="background-color: #183D0E; color: #FFC72C;" v-if="userHasPermission">Add</v-btn>
                     <!-- <v-btn @click="generateUsers" style="background-color: #183D0E; color: #FFC72C;" :disabled = "generating" v-if="!generating">Generate</v-btn>
                     <v-btn @click="generateUsers" style="background-color: #183D0E; color: #FFC72C;" :disabled = "generating" v-else-if="generating">Generating</v-btn> -->
                 </v-col>
@@ -75,9 +75,9 @@
                 <v-btn fab small inline class="ma-1" @click="displayFullMemberInfo(item)">
                     <v-icon color="blue" >mdi-information</v-icon>
                 </v-btn>
-                <v-btn fab small inline class="ma-1" v-if="userRole != null && userRole != 'Agent'" @click="depositContribution(item)">
+                <!-- <v-btn fab small inline class="ma-1" v-if="userRole != null && userRole != 'Agent'" @click="depositContribution(item)">
                     <v-icon color="green" >mdi-bank</v-icon>
-                </v-btn>
+                </v-btn> -->
                 <!-- <v-btn fab small inline class="ma-1">
                     <v-icon color="blue" @click="addPhoneForMembers(item)">mdi-plus</v-icon>
                 </v-btn> -->
@@ -208,7 +208,7 @@
                 </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="grey darken-2" text @click="closeAddForm">Cancel</v-btn>
+                <v-btn color="grey darken-2" text @click="closeUserForm">Cancel</v-btn>
                 <v-btn color="blue darken-1" text @click="saveUser" :disabled="!addFormValid">Submit</v-btn>
             </v-card-actions>
             </v-card>
@@ -593,44 +593,19 @@ export default {
         },
         editUser(User) {
             this.editUserMode = true;
-            // alert(User.name)
-            // this.newUser.batch_number = User.batch_number;
-            // this.newUser.id = User.id;
-            // this.newUser.name = User.name;
-            // this.newUser.phone = User.phone;
-            // this.newUser.age = User.age;
-            // this.newUser.gender = User.gender;
-            // this.newUser.id_front = User.id_front;
-            // this.newUser.id_back = User.id_back;
-            // this.newUser.profile_pic = User.profile_pic;
-            // this.newUser.city = User.city,
-            // this.newUser.subcity = User.subcity,
-            // this.newUser.woreda = User.woreda,
-            // this.newUser.house_number = User.house_number,
-            // this.newUser.respondent_name = User.respondent_name;
-            // this.newUser.respondent_phone = User.respondent_phone;
-            // this.newUser.respondent_relation = User.respondent_relation;
-            // this.newUser.heir_name = User.heir_name;
-            // this.newUser.heir_phone = User.heir_phone;
-            // this.newUser.heir_relation = User.heir_relation;
             this.newUser = User;
-            this.showUserForm();
-            console.log(this.newUser.id);
+            this.showUserForm(true);
         },
 
         deleteUser(User) {
             this.confirmDeleteUser(User);
         },
 
-        showAddUserForm() {
-            // this.$refs.UserForm.reset();
-            // this.addDialog = true;
-            this.editUserMode = false;
-            this.newUser = {};
-            this.showUserForm();
-        },
-
-        showUserForm() {
+        showUserForm(edit) {
+            this.editUserMode = edit;
+            if (!edit) {
+                this.newUser = {};
+            }
             this.UserFormValid = false;
             this.addDialog = true;
         },
@@ -639,6 +614,8 @@ export default {
             this.addDialog = false;
             // this.$refs.UserForm.reset();
             this.editUserMode = false;
+            this.selectedMember = null;
+            this.newUser = {};
         },
         
         daysAheadOfToday(formattedDate) {
@@ -988,7 +965,8 @@ export default {
                 heir_relation: this.newUser.heir_relation,
                 winAmount: this.siteSettingsValues.dwa,
                 won: false,
-                online: false,
+                isonline: false,
+                isbanned: false,
                 addedAt: Date.now(),
                 addedBy: this.currentUser.userId
             };
@@ -1001,7 +979,7 @@ export default {
         },
 
         async confirmDelete() {
-            if (UserToDelete) {
+            if (this.UserToDelete) {
                 try {
                     const response = await fetch(`${this.server_url}/deleteMember/${this.UserToDelete.id}`, {
                         method: 'DELETE'
@@ -1090,16 +1068,6 @@ export default {
 
         // Export the workbook to a file
         writeFile(wb, "Members.xlsx");
-        },
-        showAddForm() {
-            this.addDialog = true; // Show the add User dialog
-        },
-        closeAddForm() {
-        // Close the add User dialog and reset the form
-        this.addDialog = false;
-        // this.$refs.UserForm.reset();
-
-        this.newUser = {};
         },
     },
 };
