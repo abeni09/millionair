@@ -45,9 +45,9 @@
               dense
               :disabled="loading==true"
               type='number'
-              ref="memeber_spin_timeout"
+              ref="member_spin_timeout"
               required
-              v-model="editedItem.memeber_spin_timeout"
+              v-model="editedItem.member_spin_timeout"
               hint="Enter the maximum amount of seconds given for a member to spin"
               label="Member Spin Timeout"/>
           <v-text-field
@@ -286,9 +286,7 @@ export default {
       // Decode the JWT token to extract user information
       const decodedToken = jwt.decode(token);
       this.editedItem = JSON.parse(settingToken)
-      console.log(this.editedItem);
       this.editedItem.drawstarted = JSON.parse(settingToken).drawstarted
-      console.log(this.editedItem);
       if (decodedToken) {
         // this.$store.dispatch('auth/login', decodedToken);
         this.currentUser = decodedToken
@@ -509,7 +507,7 @@ export default {
 
                 const data = await response.json();
                 localStorage.setItem('settings', JSON.stringify(data.setting))
-                this.editedItem.drawstarted = !this.editedItem.drawstarted
+                this.editedItem.drawstarted = data.setting.drawstarted
                 this.setSnackbarMessage(data.message)
                 this.starping = false
                 console.log(data.setting);
@@ -600,7 +598,7 @@ export default {
         drawstartedat: null,
         site_name: null,
         batch_amount: null,
-        memeber_spin_timeout: null,
+        member_spin_timeout: null,
         draw_timeout: null,
         service_fee: null,
         deposit_contribution_before: null,

@@ -312,7 +312,6 @@ export default {
                 // return false
                 
             }
-            this.loading = false;
         },
         setSnackbarMessage(_value){
             this.snackbar = true;
