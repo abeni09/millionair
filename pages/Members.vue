@@ -352,8 +352,8 @@ export default {
         }
         if (this.siteSettingsValues.server_url) {
             this.server_url = this.siteSettingsValues.server_url  
-            // this.fetchMembers()     
-            this.loading = false        
+            this.fetchMembers()     
+            // this.loading = false        
         } else {
             console.log('Invalid setting token.');
             this.$store.dispatch('auth/logout')
