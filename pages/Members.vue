@@ -353,7 +353,7 @@ export default {
         if (this.siteSettingsValues.server_url) {
             this.server_url = this.siteSettingsValues.server_url  
             // this.fetchMembers()     
-            // this.loading = false        
+            this.loading = false        
         } else {
             console.log('Invalid setting token.');
             this.$store.dispatch('auth/logout')
@@ -562,7 +562,7 @@ export default {
         async fetchSearchResults(keyword, column){
             try {
                 this.loading = true
-                const response = await fetch(`${this.server_url}/processDeposit`, {
+                const response = await fetch(`${this.server_url}/searchMembers/${column}/${keyword}`, {
                 // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
                     method: 'GET',
                 })
