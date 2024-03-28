@@ -55,7 +55,7 @@
           clearable
           dense
           v-model="batch_number"
-          label="Pots"
+          label="Batch"
           :items="potOptions"
         />
       </v-col>
@@ -85,8 +85,27 @@
     </v-row>
     
     <!-- Dashboard Cards Grid -->
-    <v-row align="center" class="ma-5">
+    <v-row v-if="!batch_number" align="center" class="ma-5">
       <v-col class="mt-1" align="center" v-for="(card, index) in dashboardCards" :key="index" cols="12" md="6" sm = '6'>
+        <!-- <dash-card
+          :iconStyle="card.icon"
+          :dcolor="card.dcolor"
+          :title="card.title"
+          :countItems="card.countItems"
+        /> -->
+        <div class="card-main">
+          <div class="card-block text-center">
+          <v-icon size="50" color="rgb(23, 59, 13)" class="feather icon-mail text-c-lite-green d-block f-40">{{ card.icon }}</v-icon>
+          <h3 class="mt-5"><span style="color: rgb(251, 197, 43); size: 30px;">{{ card.countItems }}</span>
+          {{ card.title }}</h3>
+          <!-- <p class="m-b-10">Your main list is growing</p> -->
+          </div>
+        </div>
+      </v-col>
+    </v-row>
+        <!-- Dashboard Cards Grid -->
+    <v-row v-else align="center" class="ma-5">
+      <v-col class="mt-1" align="center" v-for="(card, index) in singleCard" :key="index" cols="12" md="12" sm = '12'>
         <!-- <dash-card
           :iconStyle="card.icon"
           :dcolor="card.dcolor"
@@ -109,7 +128,7 @@
         <v-text class="headline">NO POT SELECTED</v-text>
       </v-col>
     </v-row>
-    <v-row v-else-if="batch_number != null" align="center">
+    <v-row v-else align="center">
       <v-col align="center" v-if="potDataLoading">
         <v-progress-circular indeterminate color="success" size="50"/>
       </v-col>
@@ -153,17 +172,22 @@ export default {
         { dcolor: "rgb(23, 59, 13)", title: "Members", icon:"mdi-account", countItems: this.totalMembers },
       ];
     },
+    singleCard() {
+      return [
+        { dcolor: "rgb(23, 59, 13)", title: `Total Members For Batch ${this.batch_number}`, icon:"mdi-pot", countItems: this.totalMembersPerPot },
+      ];
+    },
     dashboardPotCards() {
       return [
         { title: "How many people can the money an individual, that has already been lucky, contributes a day reach (paid) to?", icon:"mdi-pot", countItems: this.q0},
         { title: "How many people can the money all individual(s), that has already been lucky, contribute a day reach (paid) to?", icon:"mdi-pot", countItems: this.q1},
-        { title: "How many people can the money an individual, that is yet to be lucky, contributes a day reach (paid) to?", icon:"mdi-pot", countItems: (this.siteSettings.deposit_contribution_before/this.stillToWinMembers.length/this.siteSettings.daily_win_amount).toExponential(3)},
-        { title: "How many people can the money all individual(s), that is yet to be lucky, contribute a day reach (paid) to?", icon:"mdi-pot", countItems: (((parseInt(this.siteSettings.deposit_contribution_before) * this.stillToWinMembers.length)/this.stillToWinMembers.length)/parseInt(this.siteSettings.daily_win_amount)).toExponential(3)},
-        { title: "How many people can the money all individual(s) contribute a day reach (paid) to?", icon:"mdi-pot", countItems: ((((parseInt(this.siteSettings.deposit_contribution_before) * this.stillToWinMembers.length) + (parseInt(this.siteSettings.deposit_contribution_after) * this.winnerMembers.length))/this.stillToWinMembers.length)/parseInt(this.siteSettings.daily_win_amount)).toExponential(3)},
-        { title: "How many days left to finish?", icon:"mdi-account", countItems: (this.stillToWinMembers.length/parseInt(this.siteSettings.dnw).toExponential(3)) },
-        { title: "How much money left to finish?", icon:"mdi-account", countItems: (this.stillToWinMembers.length * parseInt(this.siteSettings.daily_win_amount)).toExponential(3) },
+        { title: "How many people can the money an individual, that is yet to be lucky, contributes a day reach (paid) to?", icon:"mdi-pot", countItems: (this.siteSettings.deposit_contribution_before/this.totalNonWinnerMembersPerPot/this.siteSettings.daily_win_amount).toExponential(3)},
+        { title: "How many people can the money all individual(s), that is yet to be lucky, contribute a day reach (paid) to?", icon:"mdi-pot", countItems: (((parseInt(this.siteSettings.deposit_contribution_before) * this.totalNonWinnerMembersPerPot)/this.totalNonWinnerMembersPerPot)/parseInt(this.siteSettings.daily_win_amount)).toExponential(3)},
+        { title: "How many people can the money all individual(s) contribute a day reach (paid) to?", icon:"mdi-pot", countItems: ((((parseInt(this.siteSettings.deposit_contribution_before) * this.totalNonWinnerMembersPerPot) + (parseInt(this.siteSettings.deposit_contribution_after) * this.totalWinnerMembersPerPot))/this.totalNonWinnerMembersPerPot)/parseInt(this.siteSettings.daily_win_amount)).toExponential(3)},
+        { title: "How many days left to finish?", icon:"mdi-account", countItems: (this.totalNonWinnerMembersPerPot/parseInt(this.siteSettings.daily_number_of_winners).toExponential(3)) },
+        { title: "How much money left to finish?", icon:"mdi-account", countItems: (this.totalNonWinnerMembersPerPot * parseInt(this.siteSettings.daily_win_amount)).toExponential(3) },
         { title: "How much money collected so far from contribution?", icon:"mdi-account", countItems: this.totalDepositPerPot},
-        { title: "How much money payed so far for those who got lucky?", icon:"mdi-account", countItems: this.winnerMembers.length * parseInt(this.siteSettings.daily_win_amount) },
+        { title: "How much money payed so far for those who got lucky?", icon:"mdi-account", countItems: this.totalWinnerMembersPerPot * parseInt(this.siteSettings.daily_win_amount) },
         
       ];
     },
@@ -180,6 +204,7 @@ export default {
     }
   },
   watch: {
+
     batch_number: 'fetchDataForSelectedPot',
     member: 'fetchDataForSelectedMember',
 
@@ -198,15 +223,16 @@ export default {
       q7: 0,
       q8: 0,
       totalMembers: 0,
-      totalPots: 0,
+      totalMembersPerPot: 0,
+      totalWinnerMembersPerPot: 0,
+      totalNonWinnerMembersPerPot: 0,
       // specificShared: 0,
       days: 0,
       potDataLoading: false,
       batch_number:null,
       member:null,
       company:null,
-      duration: "Daily",
-      today:null,
+      // today:null,
       status:null,
       winStatus:null,
       specificReportResponse:null,
@@ -246,6 +272,7 @@ export default {
       // Decode the JWT token to extract user information
       const decodedToken = jwt.decode(token);
       this.siteSettings = JSON.parse(settingToken)
+      this.numberOfPots = this.siteSettings.batch_amount
       if (decodedToken && this.siteSettings) {
         // this.$store.dispatch('auth/login', decodedToken);
         this.currentUser = decodedToken
@@ -265,8 +292,10 @@ export default {
         else{
             console.log("pots unavailable");
         }
-        this.fetchMembers()
-        this.fetchDeposits()
+        // this.fetchMembers()
+        this.fetchMembersCount()
+        this.loading = false
+        // this.fetchDeposits()
 
       } else {
         console.log('Invalid JWT token.');
@@ -287,12 +316,9 @@ export default {
     async fetchMembers(){
             this.loading = true;
             try {
-                const response = await fetch(`${this.siteSettings.server_url}/fetchMembers`, {
-                // const response = await fetch(`${this.siteSettingsValues.su}/fetchMembers`, {
+                // const response = await fetch(`http://localhost:3006/fetchMembers`, {
+                const response = await fetch(`http://localhost:3006/fetchMembers`, {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                 })
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -313,7 +339,7 @@ export default {
     async fetchDeposits(){
             this.loading = true;
             try {
-                const response = await fetch(`${this.siteSettings.server_url}/fetchDeposits`, {
+                const response = await fetch(`http://localhost:3006/fetchDeposits`, {
                 // const response = await fetch(`${this.siteSettingsValues.su}/fetchMembers`, {
                     method: 'GET',
                     headers: {
@@ -337,71 +363,229 @@ export default {
             this.loading = false;
         },
     
-    fetchDataForSelectedMember(){
+    async fetchMembersCount(){
       
-      if (this.originalMemberOptions.length != 0) {
-        this.selectedMember = this.originalMemberOptions.filter(newMember => newMember.id == this.member && newMember.batch_number == this.batch_number)[0]
-        console.log(this.selectedMember);
-        if (this.selectedMember != null) {
-          this.winStatus = this.selectedMember.won
-          this.selectedMemberDeposit = this.deposits.filter(deposit => deposit.deposited_for === this.selectedMember.id)
-          
-        
-          if (this.selectedMemberDeposit.length != 0) {
-            this.selectedMemberDeposit.forEach(element => {
-              this.selectedMemberTotalDeposit = this.selectedMemberTotalDeposit + parseInt(element.amount)
-              if (element.status == 'Before') {
-                this.selectedMemberBeforeDeposit = this.selectedMemberBeforeDeposit + parseInt(element.amount)
-              }
-              if (element.status == 'After') {
-                this.selectedMemberAfterDeposit = this.selectedMemberAfterDeposit + parseInt(element.amount)
-              }
-            });            
-          }
+      try {
+        const response = await fetch(`http://localhost:3006/fetchMembersCount`, {
+        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+            method: 'GET',
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
+
+        const data = await response.json();
+        this.totalMembers = data.count;
+        
+      } catch (error) {
+        console.error('Error updating deposit:', error);
+        this.setSnackbarMessage(error)
+        return false
+    
       }
     },
-    fetchDataForSelectedPot() {
-      this.potDataLoading = true
-      this.memberOptions = []
-      this.member = null
-      this.filteredDeposits = []
-      this.totalDepositPerPot = 0
-      this.winnerMembers = []
-      this.stillToWinMembers = []
+    async fetchMembersCountForBatch(){
       
-      // Filter membersOptions based on the selected pot
-      if (this.originalMemberOptions.length != 0) {
+      try {
+        const response = await fetch(`http://localhost:3006/fetchMembersCount/${this.batch_number}`, {
+        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+            method: 'GET',
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.totalMembersPerPot = data.count;
+        
+      } catch (error) {
+        console.error('Error updating deposit:', error);
+        this.setSnackbarMessage(error)
+        return false
+    
+      }
+    },
+    async fetchMembersForBatch(){
+      
+      try {
+        const response = await fetch(`http://localhost:3006/fetchMembers/${this.batch_number}`, {
+        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+            method: 'GET',
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.originalMemberOptions = data.members;
         this.memberOptions = this.originalMemberOptions
-          .filter(sale => sale.batch_number === this.batch_number)
           .map(sale => ({
             text: `${sale.name} (${sale.age})`,
             value: sale.id,
           }));
-        this.filteredDeposits = this.deposits
-          .filter(deposit => deposit.batch_number == this.batch_number)
-          this.filteredDeposits.forEach(element => {
-            this.totalDepositPerPot = this.totalDepositPerPot + parseInt(element.amount)
-          });
-          // this.totalDepositPerPot = this.deposits
-          // .filter(deposit => deposit.batch_number === this.batch_number)
-          // .reduce((total, obj) => total + obj.amount, 0);
+        
+      } catch (error) {
+        console.error(`Error fetching members for batch ${batch_number}:`, error);
+        this.setSnackbarMessage(error)
+        return false
 
-          console.log(this.totalDepositPerPot);
-          console.log(this.batch_number);
-          console.log(this.deposits[0].batch_number);
-        this.winnerMembers = this.originalMemberOptions
-          .filter(sale => sale.batch_number === this.batch_number && sale.won == true)
-        this.stillToWinMembers = this.originalMemberOptions
-          .filter(sale => sale.batch_number === this.batch_number && sale.won != true)
-          console.log((this.siteSettings.deposit_contribution_after)/this.stillToWinMembers.length);
-        this.q0 = (this.siteSettings.deposit_contribution_after/(this.stillToWinMembers.length * this.siteSettings.daily_win_amount)).toExponential(3)
-        this.q1 = ((parseInt(this.siteSettings.deposit_contribution_after) * this.winnerMembers.length)/(this.stillToWinMembers.length) * parseInt(this.siteSettings.daily_win_amount)).toExponential(3)
       }
-      // Replace this with your actual logic
-      // console.log(`Fetching data for pot: ${this.filteredDeposits[0].amount}`);
+    },
+    async fetchWinnerMembersCountForBatch(){
+      
+      try {
+        const response = await fetch(`http://localhost:3006/fetchMembersCount/${this.batch_number}/${true}`, {
+        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+            method: 'GET',
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.totalWinnerMembersPerPot = data.count;
+      } catch (error) {
+        console.error(`Error fetching members for batch ${batch_number}:`, error);
+        this.setSnackbarMessage(error)
+        return false
+
+      }
+    },
+    async fetchNonWinnerMembersCountForBatch(){
+      
+      try {
+        const response = await fetch(`http://localhost:3006/fetchMembersCount/${this.batch_number}/${false}`, {
+        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+            method: 'GET',
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.totalNonWinnerMembersPerPot = data.count;
+      } catch (error) {
+        console.error(`Error fetching members for batch ${batch_number}:`, error);
+        this.setSnackbarMessage(error)
+        return false
+
+      }
+    },
+    async fetchTotalDepositForBatch(){
+      
+      try {
+        const response = await fetch(`http://localhost:3006/fetchDepositSum/${this.batch_number}`, {
+        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+            method: 'GET',
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.totalDepositPerPot = data.totalAmount;
+      } catch (error) {
+        console.error(`Error fetching totla deposit for batch ${batch_number}:`, error);
+        this.setSnackbarMessage(error)
+        return false
+
+      }
+    },
+
+    async fetchTotalExpiredDepositForSelectedMember(){
+      
+      try {
+        const response = await fetch(`http://localhost:3006/fetchDepositSum/${this.batch_number}/${true}/${this.selectedMember.id}`, {
+        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+            method: 'GET',
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.selectedMemberBeforeDeposit = data.totalAmount;
+      } catch (error) {
+        console.error(`Error fetching totla deposit for batch ${this.batch_number}:`, error);
+        this.setSnackbarMessage(error)
+        return false
+
+      }
+    },
+    async fetchTotalNotExpiredDepositForSelectedMember(){
+      
+      try {
+        const response = await fetch(`http://localhost:3006/fetchDepositSum/${this.batch_number}/${false}/${this.selectedMember.id}`, {
+        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+            method: 'GET',
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.selectedMemberAfterDeposit = data.totalAmount;
+      } catch (error) {
+        console.error(`Error fetching totla deposit for batch ${this.batch_number}:`, error);
+        this.setSnackbarMessage(error)
+        return false
+
+      }
+    },
+    async fetchTotalTotalDepositForSelectedMember(){
+      
+      try {
+        const response = await fetch(`http://localhost:3006/fetchDepositSum/${this.batch_number}/${this.selectedMember.id}`, {
+        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+            method: 'GET',
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.selectedMemberTotalDeposit = data.totalAmount;
+      } catch (error) {
+        console.error(`Error fetching totla deposit for batch ${this.batch_number}:`, error);
+        this.setSnackbarMessage(error)
+        return false
+
+      }
+    },
+    fetchDataForSelectedMember(){
+      if (this.member != null) {
+      this.potDataLoading = true
+      
+      if (this.originalMemberOptions.length != 0) {
+        this.selectedMember = this.originalMemberOptions.filter(newMember => newMember.id == this.member && newMember.batch_number == this.batch_number)[0]
+        // console.log(this.selectedMember);
+        if (this.selectedMember != null) {
+          this.winStatus = this.selectedMember.won
+          this.fetchTotalTotalDepositForSelectedMember()
+          this.fetchTotalExpiredDepositForSelectedMember()
+          this.fetchTotalNotExpiredDepositForSelectedMember()
+
+        }
+      }
+      
       this.potDataLoading = false
-      // console.log(this.memberOptions);
+        
+      }
+    },
+    fetchDataForSelectedPot() {
+      if (this.batch_number != null) {
+        this.potDataLoading = true
+        this.member = null
+        this.fetchMembersCountForBatch()
+        this.fetchTotalDepositForBatch()
+        this.fetchWinnerMembersCountForBatch()
+        this.fetchNonWinnerMembersCountForBatch()
+        this.fetchMembersForBatch()
+        this.q0 = (this.siteSettings.deposit_contribution_after/(this.totalNonWinnerMembersPerPot * this.siteSettings.daily_win_amount)).toExponential(3)
+        this.q1 = ((parseInt(this.siteSettings.deposit_contribution_after) * this.totalWinnerMembersPerPot)/(this.totalNonWinnerMembersPerPot) * parseInt(this.siteSettings.daily_win_amount)).toExponential(3)
+        this.potDataLoading = false
+        
+      }
     },
     getStatusColor(status) {
       return status
@@ -418,7 +602,7 @@ export default {
       // this.duration = null
       this.generating = false
       this.days = 0
-      this.today = null
+      // this.today = null
       this.status = null
     },
     // fetchMemberUsingID(memberID){

@@ -538,10 +538,6 @@ export default {
     },
     
     watch: {
-        
-        batch_number: 'fetchDataForSelectedPot',
-
-        
       search(newValue) {
         // Check if the search input is empty
         if (newValue.trim()) {
