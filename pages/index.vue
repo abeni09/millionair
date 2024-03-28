@@ -316,8 +316,8 @@ export default {
     async fetchMembers(){
             this.loading = true;
             try {
-                // const response = await fetch(`http://localhost:3006/fetchMembers`, {
-                const response = await fetch(`http://localhost:3006/fetchMembers`, {
+                // const response = await fetch(`${this.siteSettings.server_url}/fetchMembers`, {
+                const response = await fetch(`${this.siteSettings.server_url}/fetchMembers`, {
                     method: 'GET',
                 })
                 if (!response.ok) {
@@ -339,7 +339,7 @@ export default {
     async fetchDeposits(){
             this.loading = true;
             try {
-                const response = await fetch(`http://localhost:3006/fetchDeposits`, {
+                const response = await fetch(`${this.siteSettings.server_url}/fetchDeposits`, {
                 // const response = await fetch(`${this.siteSettingsValues.su}/fetchMembers`, {
                     method: 'GET',
                     headers: {
@@ -366,8 +366,8 @@ export default {
     async fetchMembersCount(){
       
       try {
-        const response = await fetch(`http://localhost:3006/fetchMembersCount`, {
-        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+        const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount`, {
+        // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
         })
         if (!response.ok) {
@@ -387,8 +387,8 @@ export default {
     async fetchMembersCountForBatch(){
       
       try {
-        const response = await fetch(`http://localhost:3006/fetchMembersCount/${this.batch_number}`, {
-        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+        const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount/${this.batch_number}`, {
+        // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
         })
         if (!response.ok) {
@@ -408,8 +408,8 @@ export default {
     async fetchMembersForBatch(){
       
       try {
-        const response = await fetch(`http://localhost:3006/fetchMembers/${this.batch_number}`, {
-        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+        const response = await fetch(`${this.siteSettings.server_url}/fetchMembers/${this.batch_number}`, {
+        // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
         })
         if (!response.ok) {
@@ -434,8 +434,8 @@ export default {
     async fetchWinnerMembersCountForBatch(){
       
       try {
-        const response = await fetch(`http://localhost:3006/fetchMembersCount/${this.batch_number}/${true}`, {
-        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+        const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount/${this.batch_number}/${true}`, {
+        // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
         })
         if (!response.ok) {
@@ -454,8 +454,8 @@ export default {
     async fetchNonWinnerMembersCountForBatch(){
       
       try {
-        const response = await fetch(`http://localhost:3006/fetchMembersCount/${this.batch_number}/${false}`, {
-        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+        const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount/${this.batch_number}/${false}`, {
+        // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
         })
         if (!response.ok) {
@@ -474,8 +474,8 @@ export default {
     async fetchTotalDepositForBatch(){
       
       try {
-        const response = await fetch(`http://localhost:3006/fetchDepositSum/${this.batch_number}`, {
-        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+        const response = await fetch(`${this.siteSettings.server_url}/fetchDepositSum/${this.batch_number}`, {
+        // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
         })
         if (!response.ok) {
@@ -495,8 +495,8 @@ export default {
     async fetchTotalExpiredDepositForSelectedMember(){
       
       try {
-        const response = await fetch(`http://localhost:3006/fetchDepositSum/${this.batch_number}/${true}/${this.selectedMember.id}`, {
-        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+        const response = await fetch(`${this.siteSettings.server_url}/fetchDepositSum/${this.batch_number}/${true}/${this.selectedMember.id}`, {
+        // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
         })
         if (!response.ok) {
@@ -515,8 +515,8 @@ export default {
     async fetchTotalNotExpiredDepositForSelectedMember(){
       
       try {
-        const response = await fetch(`http://localhost:3006/fetchDepositSum/${this.batch_number}/${false}/${this.selectedMember.id}`, {
-        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+        const response = await fetch(`${this.siteSettings.server_url}/fetchDepositSum/${this.batch_number}/${false}/${this.selectedMember.id}`, {
+        // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
         })
         if (!response.ok) {
@@ -535,8 +535,8 @@ export default {
     async fetchTotalTotalDepositForSelectedMember(){
       
       try {
-        const response = await fetch(`http://localhost:3006/fetchDepositSum/${this.batch_number}/${this.selectedMember.id}`, {
-        // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
+        const response = await fetch(`${this.siteSettings.server_url}/fetchDepositSum/${this.batch_number}/${this.selectedMember.id}`, {
+        // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
         })
         if (!response.ok) {
