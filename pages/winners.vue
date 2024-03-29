@@ -103,11 +103,11 @@
     // },
     mounted() {
       
-      const token = localStorage.getItem('token');
+      this.token = localStorage.getItem('token');
       const settingToken = localStorage.getItem('serverURL');
-      if (token) {
-        // Decode the JWT token to extract user information
-        const decodedToken = jwt.decode(token);
+      if (this.token) {
+        // Decode the JWT this.token to extract user information
+        const decodedToken = jwt.decode(this.token);
       //   const settingToken = jwt.decode(siteSettings);
         console.log(settingToken);
         if (decodedToken) {
@@ -146,6 +146,7 @@
     },
     data() {
         return {
+            token: null,
             memberFields: {
                 won: 'Won',
                 batch_number: 'Batch',
@@ -215,10 +216,11 @@
               try {
                   // const response = await fetch(`http://localhost:3006/fetchWinners`, {
                   const response = await fetch(`${this.server_url}/fetchWinners`, {
-                      method: 'GET',
-                      headers: {
-                          'Content-Type': 'application/json',
-                      },
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
+                    },
                   })
                   // if (response.status == 100) {
                       

@@ -259,18 +259,19 @@ export default {
       currentUser:null,
       userHasPermission:false,
       loading: true,
+      token:null
     }
 
   },
   mounted(){
     
-    const token = localStorage.getItem('token');
+    this.token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
     console.log(settingToken);
-    console.log(token);
-    if (token && settingToken) {
-      // Decode the JWT token to extract user information
-      const decodedToken = jwt.decode(token);
+    console.log(this.token);
+    if (this.token && settingToken) {
+      // Decode the JWT this.token to extract user information
+      const decodedToken = jwt.decode(this.token);
       this.siteSettings = JSON.parse(settingToken)
       this.numberOfPots = this.siteSettings.batch_amount
       if (decodedToken && this.siteSettings) {
@@ -298,14 +299,14 @@ export default {
         // this.fetchDeposits()
 
       } else {
-        console.log('Invalid JWT token.');
+        console.log('Invalid JWT this.token.');
         if (!decodedToken) {
           this.$store.dispatch('auth/logout')          
         }
       }
     } else {
-      console.log('JWT token not found.');
-      if (!token) {
+      console.log('JWT this.token not found.');
+      if (!this.token) {
         this.$store.dispatch('auth/logout')          
       }
     }
@@ -319,6 +320,9 @@ export default {
                 // const response = await fetch(`${this.siteSettings.server_url}/fetchMembers`, {
                 const response = await fetch(`${this.siteSettings.server_url}/fetchMembers`, {
                     method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`
+                    },
                 })
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -343,7 +347,7 @@ export default {
                 // const response = await fetch(`${this.siteSettingsValues.su}/fetchMembers`, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
                 })
                 if (!response.ok) {
@@ -369,6 +373,9 @@ export default {
         const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount`, {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
         })
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -390,6 +397,9 @@ export default {
         const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount/${this.batch_number}`, {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
         })
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -411,6 +421,9 @@ export default {
         const response = await fetch(`${this.siteSettings.server_url}/fetchMembers/${this.batch_number}`, {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
         })
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -437,6 +450,9 @@ export default {
         const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount/${this.batch_number}/${true}`, {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
         })
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -457,6 +473,9 @@ export default {
         const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount/${this.batch_number}/${false}`, {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
         })
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -477,6 +496,9 @@ export default {
         const response = await fetch(`${this.siteSettings.server_url}/fetchDepositSum/${this.batch_number}`, {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
         })
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -498,6 +520,9 @@ export default {
         const response = await fetch(`${this.siteSettings.server_url}/fetchDepositSum/${this.batch_number}/${true}/${this.selectedMember.id}`, {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
         })
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -518,6 +543,9 @@ export default {
         const response = await fetch(`${this.siteSettings.server_url}/fetchDepositSum/${this.batch_number}/${false}/${this.selectedMember.id}`, {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
         })
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -538,6 +566,9 @@ export default {
         const response = await fetch(`${this.siteSettings.server_url}/fetchDepositSum/${this.batch_number}/${this.selectedMember.id}`, {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
         })
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);

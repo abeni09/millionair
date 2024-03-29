@@ -317,12 +317,12 @@ export default {
     // },
     async mounted() {
         
-    const token = localStorage.getItem('token');
+    this.token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
     // const pots = localStorage.getItem('pots');
-    if (token) {
-      // Decode the JWT token to extract user information
-      const decodedToken = jwt.decode(token);
+    if (this.token) {
+      // Decode the JWT this.token to extract user information
+      const decodedToken = jwt.decode(this.token);
       this.siteSettingsValues = JSON.parse(settingToken)
     //   const settingToken = jwt.decode(siteSettings);
     //   console.log(settingToken);
@@ -355,23 +355,24 @@ export default {
             // this.fetchMembers()     
             this.loading = false        
         } else {
-            console.log('Invalid setting token.');
+            console.log('Invalid setting this.token.');
             this.$store.dispatch('auth/logout')
             
         }
 
         // }
       } else {
-        console.log('Invalid JWT token.');
+        console.log('Invalid JWT this.token.');
         this.$store.dispatch('auth/logout')
       }
     } else {
-      console.log('JWT token not found.');
+      console.log('JWT this.token not found.');
       this.$store.dispatch('auth/logout')
     }
     },
     data() {
         return {
+            token: null,
             siteSettingsValues: null,
             server_url: null,
             loadingMore: false,
@@ -546,7 +547,7 @@ export default {
             // Set a new timer to execute the search function after 2 seconds
             this.searchTimer = setTimeout(() => {
                 this.fetchSearchResults(newValue, this.searchColumn);
-            }, 2000); // Change delay time as needed (2000 milliseconds = 2 seconds)
+            }, 1000); // Change delay time as needed (2000 milliseconds = 2 seconds)
         }
         else{
             // Clear previous timer
@@ -559,6 +560,10 @@ export default {
             try {
                 this.loading = true
                 const response = await fetch(`${this.server_url}/searchMembers/${column}/${keyword}`, {
+                    
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`
+                    },
                 // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
                     method: 'GET',
                 })
@@ -801,6 +806,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify(
                         {
@@ -833,6 +839,9 @@ export default {
             try {
                 const response = await fetch(`${this.server_url}/fetchMembers`, {
                 // const response = await fetch(`http://localhost:3006/fetchMembers`, {
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`
+                    },
                     method: 'GET',
                 })
                 if (!response.ok) {
@@ -861,7 +870,8 @@ export default {
                 fetch(`${this.server_url}/saveMember`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify({userData : userData, edit: this.editUserMode, memberId: this.newUser.id})
                 })
@@ -948,7 +958,10 @@ export default {
             if (this.UserToDelete) {
                 try {
                     const response = await fetch(`${this.server_url}/deleteMember/${this.UserToDelete.id}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`
+                        },
                     });
 
                     if (!response.ok) {

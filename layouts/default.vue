@@ -91,7 +91,7 @@
     name: 'DefaultLayout',
     data() {
       return {
-        logToken: null,
+        token: null,
         primarycolor: '#183D0E',
         secondarycolor: '#FFC72C',
         siteName:'',
@@ -125,6 +125,7 @@
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
                 },
             })
             // if (response.status == 100) {
@@ -158,6 +159,7 @@
         // Remove the JWT token from cookies
         // this.$cookies.remove('token');
         localStorage.removeItem('token')
+        this.token = null;
         this.$store.dispatch('auth/logout');
       },
       updateMenuItems() {
@@ -249,12 +251,12 @@
       
       // Access the JWT token from cookies or localStorage
       // const token = this.$cookies.get('token');
-      const token = localStorage.getItem('token');
+      this.token = localStorage.getItem('token');
       const settingToken = localStorage.getItem('settings');
       // const pots = localStorage.getItem('pots');
-      if (token) {
-        // Decode the JWT token to extract user information
-        const decodedToken = jwt.decode(token);
+      if (this.token) {
+        // Decode the JWT this.token to extract user information
+        const decodedToken = jwt.decode(this.token);
         this.footerText = JSON.parse(settingToken).copy_right_content
         if (decodedToken) {
           if (this.isTokenExpired(decodedToken)) {

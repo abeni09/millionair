@@ -280,11 +280,11 @@ export default {
 //     }
 //   },
   mounted(){
-    const token = localStorage.getItem('token');
+    this.token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
-    if (token) {
-      // Decode the JWT token to extract user information
-      const decodedToken = jwt.decode(token);
+    if (this.token) {
+      // Decode the JWT this.token to extract user information
+      const decodedToken = jwt.decode(this.token);
       this.editedItem = JSON.parse(settingToken)
       this.editedItem.drawstarted = JSON.parse(settingToken).drawstarted
       if (decodedToken) {
@@ -330,12 +330,13 @@ export default {
     async fetchSiteSettings(){
             this.loading = true;
             try {
-                const response = await fetch(`http://78.46.175.135:3006/fetchSiteSettings`, {
-                // const response = await fetch(`${this.editedItem.server_url}/fetchSiteSettings`, {
+                // const response = await fetch(`http://78.46.175.135:3006/fetchSiteSettings`, {
+                const response = await fetch(`${this.editedItem.server_url}/fetchSiteSettings`, {
                 // const response = await fetch(`${this.siteSettingsValues.server_url}/generate-users`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
                 })
                 // if (response.status == 100) {
@@ -412,8 +413,12 @@ export default {
             this.proPicUploadStarted = true
             const formData = new FormData();
             formData.append('image', file); // 'file' is the selected image file
-            await fetch(`http://78.46.175.135:3006/upload`, {
+            await fetch(`${this.editedItem.server_url}/upload`, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                },
                 body: formData
             })
             .then(response => response.json())
@@ -462,11 +467,12 @@ export default {
             this.editedItem.updated_at = 'NOW()';
             // this.editedItem.drawstarted = false;
             try {
-                // const response = await fetch(`${this.editedItem.server_url}/updateSiteSettings`, {
-                const response = await fetch(`http://localhost:3006/updateSiteSettings`, {
+                const response = await fetch(`${this.editedItem.server_url}/updateSiteSettings`, {
+                // const response = await fetch(`http://localhost:3006/updateSiteSettings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify({userId: this.currentUser.userId, updatedData: this.editedItem}),
                 })
@@ -498,6 +504,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify({drawstarted: !this.editedItem.drawstarted}),
                 })
@@ -529,6 +536,7 @@ export default {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
                 })
                 if (!response.ok) {
@@ -553,6 +561,7 @@ export default {
   },
 
  data: () => ({
+    token: null,
     userHasPermission: false,
     // server_url: null,
     snackBarText:'',

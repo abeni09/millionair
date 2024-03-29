@@ -169,11 +169,11 @@ export default {
   // },
   mounted() {
     
-    const token = localStorage.getItem('token');
+    this.token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
-    if (token) {
-      // Decode the JWT token to extract user information
-      const decodedToken = jwt.decode(token);
+    if (this.token) {
+      // Decode the JWT this.token to extract user information
+      const decodedToken = jwt.decode(this.token);
       this.siteSettingsValues = JSON.parse(settingToken)
     //   const settingToken = jwt.decode(siteSettings);
     //   console.log(settingToken);
@@ -213,6 +213,7 @@ export default {
   },
   data() {
       return {
+        token: null,
         snackBarText:'',
         timeout: 2000,
         snackbar:false,
@@ -289,6 +290,7 @@ export default {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
                 })
                 // if (response.status == 100) {
@@ -378,7 +380,8 @@ export default {
                 // fetch(`http://localhost:3006/saveUser`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify({userData : userData, edit: this.editUserMode, memberId: this.newUser.id})
                 })
@@ -437,7 +440,11 @@ export default {
         if (this.UserToDelete) {
             try {
                 const response = await fetch(`${this.server_url}/deleteUser/${this.UserToDelete.id}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
+                    },
                 });
 
                 if (!response.ok) {
