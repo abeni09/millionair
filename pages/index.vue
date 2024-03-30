@@ -64,8 +64,19 @@
              cols="12"
              md="4"
              sm="6">
+        <v-progress-circular indeterminate color="success" v-if="(loading || potDataLoading) && batch_number"/>
         <v-select
-        :disabled = 'batch_number == null'
+        v-else-if = 'batch_number != null && !loading'
+          outlined
+          clearable
+          dense
+          v-model="member"
+          label="Members"
+          :items="memberOptions"
+        />
+        <v-select
+        v-else
+        :disabled = "true"
           outlined
           clearable
           dense
@@ -79,7 +90,7 @@
              cols="12"
              md="4"
              sm="12">
-        <v-btn :disabled="member == null" width = "100%" @click="generateReport" color="primary" v-if="!generating && !loading">View Report</v-btn>
+        <v-btn :disabled="member == null || loading" width = "100%" @click="generateReport" color="primary" v-if="!generating">View Report</v-btn>
         <v-progress-circular indeterminate color="success" size="50" v-else-if="generating"/>
       </v-col>
     </v-row>
@@ -262,6 +273,7 @@ export default {
       currentUser:null,
       userHasPermission:false,
       loading: true,
+      disableMemberSelect: true,
       token:null
     }
 
@@ -287,7 +299,6 @@ export default {
     },
 
     async fetchMembers(){
-            this.loading = true;
             try {
                 // const response = await fetch(`${this.siteSettings.server_url}/fetchMembers`, {
                 const response = await fetch(`${this.siteSettings.server_url}/fetchMembers`, {
@@ -307,7 +318,6 @@ export default {
                 // return false
                 
             }
-            // this.loading = false;
         },
     async fetchDeposits(){
             this.loading = true;
@@ -361,6 +371,7 @@ export default {
       }
     },
     async fetchMembersCountForBatch(){
+      console.log("fetching members count for batch");
       
       try {
         const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount/${this.batch_number}`, {
@@ -385,6 +396,7 @@ export default {
       }
     },
     async fetchMembersForBatch(){
+      console.log("fetching members for batch");
       
       try {
         const response = await fetch(`${this.siteSettings.server_url}/fetchMembers/${this.batch_number}`, {
@@ -412,8 +424,10 @@ export default {
         return false
 
       }
+      this.loading = false;
     },
     async fetchWinnerMembersCountForBatch(){
+      console.log("fetching winners count for batch");
       
       try {
         const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount/${this.batch_number}/${true}`, {
@@ -437,6 +451,7 @@ export default {
       }
     },
     async fetchNonWinnerMembersCountForBatch(){
+      console.log("fetching non winners count for batch");
       
       try {
         const response = await fetch(`${this.siteSettings.server_url}/fetchMembersCount/${this.batch_number}/${false}`, {
@@ -460,6 +475,7 @@ export default {
       }
     },
     async fetchTotalDepositForBatch(){
+      console.log("fetching total deposit for batch");
       
       try {
         const response = await fetch(`${this.siteSettings.server_url}/fetchDepositSum/${this.batch_number}`, {
@@ -554,7 +570,6 @@ export default {
     },
     fetchDataForSelectedMember(){
       if (this.member != null) {
-      this.potDataLoading = true
       
       if (this.originalMemberOptions.length != 0) {
         this.selectedMember = this.originalMemberOptions.filter(newMember => newMember.id == this.member && newMember.batch_number == this.batch_number)[0]
@@ -567,23 +582,27 @@ export default {
 
         }
       }
-      
-      this.potDataLoading = false
         
       }
     },
-    fetchDataForSelectedPot() {
+    async fetchDataForSelectedPot() {
       if (this.batch_number != null) {
+        console.log("this.batch_number");
+        console.log(this.batch_number);
+        this.loading = true
         this.potDataLoading = true
         this.member = null
-        this.fetchMembersCountForBatch()
-        this.fetchTotalDepositForBatch()
-        this.fetchWinnerMembersCountForBatch()
-        this.fetchNonWinnerMembersCountForBatch()
-        this.fetchMembersForBatch()
+        await this.fetchMembersCountForBatch()
+        await this.fetchTotalDepositForBatch()
+        await this.fetchWinnerMembersCountForBatch()
+        await this.fetchNonWinnerMembersCountForBatch()
+        this.potDataLoading = false
+        await this.fetchMembersForBatch()
+        this.loading = false
+        console.log("fetching done batch");
         this.q0 = (this.siteSettings.deposit_contribution_after/(this.totalNonWinnerMembersPerPot * this.siteSettings.daily_win_amount)).toExponential(3)
         this.q1 = ((parseInt(this.siteSettings.deposit_contribution_after) * this.totalWinnerMembersPerPot)/(this.totalNonWinnerMembersPerPot) * parseInt(this.siteSettings.daily_win_amount)).toExponential(3)
-        this.potDataLoading = false
+        
         
       }
     },
