@@ -157,6 +157,7 @@ import { format } from 'date-fns';
 import { writeFile, utils } from 'xlsx';
 import jwt from 'jsonwebtoken';
 export default {
+  middleware:'agent',
 
   // props: {
   //   // Receive userHasPermission as a prop
@@ -265,51 +266,16 @@ export default {
   },
   mounted(){
     
-    this.token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
-    console.log(settingToken);
-    console.log(this.token);
-    if (this.token && settingToken) {
-      // Decode the JWT this.token to extract user information
-      const decodedToken = jwt.decode(this.token);
-      this.siteSettings = JSON.parse(settingToken)
-      this.numberOfPots = this.siteSettings.batch_amount
-      if (decodedToken && this.siteSettings) {
-        // this.$store.dispatch('auth/login', decodedToken);
-        this.currentUser = decodedToken
-        if (decodedToken.role == 'Admin') {
-          this.userHasPermission = true;
+    this.siteSettings = JSON.parse(settingToken)
+    this.numberOfPots = this.siteSettings.batch_amount
+    if (this.siteSettings.batch_amount) {
+        for (let index = 0; index < parseInt(this.siteSettings.batch_amount); index++) {
+            this.potOptions.push(index + 1)
         }
-        else{
-          this.userHasPermission = false
-        }
-        
-        if (this.siteSettings.batch_amount) {
-            for (let index = 1; index < parseInt(this.siteSettings.batch_amount)+1; index++) {
-                this.potOptions.push(index)
-            }
-            console.log(this.potOptions);
-        }
-        else{
-            console.log("pots unavailable");
-        }
-        // this.fetchMembers()
-        this.fetchMembersCount()
-        this.loading = false
-        // this.fetchDeposits()
-
-      } else {
-        console.log('Invalid JWT this.token.');
-        if (!decodedToken) {
-          this.$store.dispatch('auth/logout')          
-        }
-      }
-    } else {
-      console.log('JWT this.token not found.');
-      if (!this.token) {
-        this.$store.dispatch('auth/logout')          
-      }
+        console.log(this.potOptions);
     }
+    this.fetchMembersCount()
   },
   
   methods:{
@@ -320,9 +286,6 @@ export default {
                 // const response = await fetch(`${this.siteSettings.server_url}/fetchMembers`, {
                 const response = await fetch(`${this.siteSettings.server_url}/fetchMembers`, {
                     method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${this.token}`
-                    },
                 })
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -347,7 +310,7 @@ export default {
                 // const response = await fetch(`${this.siteSettingsValues.su}/fetchMembers`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                 })
                 if (!response.ok) {
@@ -374,7 +337,7 @@ export default {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                //'Authorization': `Bearer ${this.token}`
             },
         })
         if (!response.ok) {
@@ -398,7 +361,7 @@ export default {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                //'Authorization': `Bearer ${this.token}`
             },
         })
         if (!response.ok) {
@@ -422,7 +385,7 @@ export default {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                //'Authorization': `Bearer ${this.token}`
             },
         })
         if (!response.ok) {
@@ -451,7 +414,7 @@ export default {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                //'Authorization': `Bearer ${this.token}`
             },
         })
         if (!response.ok) {
@@ -474,7 +437,7 @@ export default {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                //'Authorization': `Bearer ${this.token}`
             },
         })
         if (!response.ok) {
@@ -497,7 +460,7 @@ export default {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                //'Authorization': `Bearer ${this.token}`
             },
         })
         if (!response.ok) {
@@ -521,7 +484,7 @@ export default {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                //'Authorization': `Bearer ${this.token}`
             },
         })
         if (!response.ok) {
@@ -544,7 +507,7 @@ export default {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                //'Authorization': `Bearer ${this.token}`
             },
         })
         if (!response.ok) {
@@ -567,7 +530,7 @@ export default {
         // const response = await fetch(`${this.siteSettings.server_url}/searchMembers/${column}/${keyword}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                //'Authorization': `Bearer ${this.token}`
             },
         })
         if (!response.ok) {

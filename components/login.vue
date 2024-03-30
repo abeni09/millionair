@@ -210,8 +210,9 @@
               } else {
                 // After receiving the token from the server response
                 // this.$cookies.set('token', data.token);
-                localStorage.setItem('token', data.token)
+                this.$cookies.set('token', data.token, {path:'/', maxAge: 60 * 60 * 24})
                 this.$store.dispatch('auth/login', data.data);
+                // this.$store.dispatch('auth/setToken', data.token)
                 // this.$router.go()
               }
             }

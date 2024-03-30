@@ -1,5 +1,5 @@
 <template>
-  <div v-if="userHasPermission">
+  <div>
         <v-snackbar
         v-model="snackbar"
         :timeout="timeout"  
@@ -40,7 +40,7 @@
             cols="12"
             md="2"
             sm="2">
-                <v-btn @click="showAddUserForm" style="background-color: #183D0E; color: #FFC72C;" v-if="userHasPermission">Add</v-btn>
+                <v-btn @click="showAddUserForm" style="background-color: #183D0E; color: #FFC72C;">Add</v-btn>
             </v-col>
         </v-row>
       </div>
@@ -164,52 +164,20 @@ import { format } from 'date-fns';
 import jwt from 'jsonwebtoken';
 
 export default {
+    middleware: 'admin',
   // validations: {
   //     newUser: UserValidations,
   // },
   mounted() {
     
-    this.token = localStorage.getItem('token');
+    // this.token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
-    if (this.token) {
-      // Decode the JWT this.token to extract user information
-      const decodedToken = jwt.decode(this.token);
-      this.siteSettingsValues = JSON.parse(settingToken)
-    //   const settingToken = jwt.decode(siteSettings);
-    //   console.log(settingToken);
-      if (decodedToken) {
-        // this.$store.dispatch('auth/login', decodedToken);
-        this.currentUser = decodedToken
-        if (decodedToken.role == 'Admin') {
-            // this.server_url = decodedToken.
-            this.userHasPermission = true;
-        }
-        else{
-            this.userHasPermission = false
-        }
-        if (!this.userHasPermission) {
-            this.$router.push('/')
-        }
-        else{
-            if (this.siteSettingsValues.server_url) {
-                this.server_url = this.siteSettingsValues.server_url  
-                this.fetchUsers()
-                this.loading = false              
-            } else {
-                console.log('Invalid setting token.');
-                this.$store.dispatch('auth/logout')
-                
-            }
-
-        }
-      } else {
-        console.log('Invalid JWT token.');
-        this.$store.dispatch('auth/logout')
-      }
-    } else {
-      console.log('JWT token not found.');
-      this.$store.dispatch('auth/logout')
-    }
+    this.siteSettingsValues = JSON.parse(settingToken)
+    if (this.siteSettingsValues.server_url) {
+        this.server_url = this.siteSettingsValues.server_url  
+        this.fetchUsers()           
+    } 
+    this.loading = false   
   },
   data() {
       return {
@@ -290,7 +258,7 @@ export default {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                 })
                 // if (response.status == 100) {
@@ -381,7 +349,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify({userData : userData, edit: this.editUserMode, memberId: this.newUser.id})
                 })
@@ -443,7 +411,7 @@ export default {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                 });
 

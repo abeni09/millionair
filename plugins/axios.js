@@ -1,11 +1,13 @@
 // plugins/axios.js
 
-import axios from 'axios';
+export default function ({ $axios, app }) {
+  $axios.onRequest(config => {
+    const token = app.$cookies.get('token'); // Retrieve the JWT token from cookies
 
-export default ({ $axios }) => {
-  // Set baseURL for all axios requests
-  $axios.defaults.baseURL = process.env.API_BASE_URL || 'http://localhost:3006'; // Change the URL to match your backend API
+    if (token) {
+      config.headers.common['Authorization'] = `Bearer ${token}`; // Attach the token to the Authorization header
+    }
 
-  // Optional: Set default headers (e.g., authorization token)
-  // $axios.defaults.headers.common['Authorization'] = 'Bearer token';
-};
+    return config;
+  });
+}

@@ -125,7 +125,7 @@
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+                    //'Authorization': `Bearer ${this.token}`
                 },
             })
             // if (response.status == 100) {
@@ -251,29 +251,8 @@
       
       // Access the JWT token from cookies or localStorage
       // const token = this.$cookies.get('token');
-      this.token = localStorage.getItem('token');
       const settingToken = localStorage.getItem('settings');
-      // const pots = localStorage.getItem('pots');
-      if (this.token) {
-        // Decode the JWT this.token to extract user information
-        const decodedToken = jwt.decode(this.token);
-        this.footerText = JSON.parse(settingToken).copy_right_content
-        if (decodedToken) {
-          if (this.isTokenExpired(decodedToken)) {
-            console.log("token expired");
-            this.$store.dispatch('auth/logout');
-          } else {
-            this.$store.dispatch('auth/login', decodedToken);
-            console.log(decodedToken);
-          }
-        } else {
-          console.log('Invalid JWT token.');
-          this.$store.dispatch('auth/logout');
-        }
-      } else {
-        console.log('JWT token not found.');
-        this.$store.dispatch('auth/logout');
-      }
+      this.footerText = JSON.parse(settingToken).copy_right_content
       
     },
   }

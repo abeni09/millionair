@@ -98,51 +98,19 @@
   import jwt from 'jsonwebtoken';
   
   export default {
+    middleware:'agent',
     // validations: {
     //     newUser: UserValidations,
     // },
     mounted() {
       
-      this.token = localStorage.getItem('token');
-      const settingToken = localStorage.getItem('serverURL');
-      if (this.token) {
-        // Decode the JWT this.token to extract user information
-        const decodedToken = jwt.decode(this.token);
-      //   const settingToken = jwt.decode(siteSettings);
-        console.log(settingToken);
-        if (decodedToken) {
-          // this.$store.dispatch('auth/login', decodedToken);
-          this.currentUser = decodedToken
-          if (decodedToken.role == 'Admin') {
-              // this.server_url = decodedToken.
-              this.userHasPermission = true;
-          }
-          else{
-              this.userHasPermission = false
-          }
-          if (!this.userHasPermission) {
-              this.$router.push('/')
-          }
-          else{
-              if (settingToken) {
-                  this.server_url = settingToken  
-                  this.fetchWinners()
-                  this.loading = false              
-              } else {
-                  console.log('Invalid setting token.');
-                  this.$store.dispatch('auth/logout')
-                  
-              }
-  
-          }
-        } else {
-          console.log('Invalid JWT token.');
-          this.$store.dispatch('auth/logout')
-        }
-      } else {
-        console.log('JWT token not found.');
-        this.$store.dispatch('auth/logout')
-      }
+        // this.token = localStorage.getItem('token');
+        const settingToken = localStorage.getItem('serverURL');
+        if (settingToken) {
+            this.server_url = settingToken  
+            this.fetchWinners()
+            this.loading = false              
+        } 
     },
     data() {
         return {
@@ -219,7 +187,7 @@
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                   })
                   // if (response.status == 100) {

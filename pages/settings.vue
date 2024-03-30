@@ -264,6 +264,7 @@ import ImageUpload from '~/components/ImageUpload.vue';
 // let uuid = require('uuid')
 
 export default {
+    middleware:'admin',
     
     computed: {
         getImageUrl() {
@@ -280,46 +281,12 @@ export default {
 //     }
 //   },
   mounted(){
-    this.token = localStorage.getItem('token');
+    // this.token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
-    if (this.token) {
-      // Decode the JWT this.token to extract user information
-      const decodedToken = jwt.decode(this.token);
-      this.editedItem = JSON.parse(settingToken)
-      this.editedItem.drawstarted = JSON.parse(settingToken).drawstarted
-      if (decodedToken) {
-        // this.$store.dispatch('auth/login', decodedToken);
-        this.currentUser = decodedToken
-        if (decodedToken.role == 'Admin') {
-            this.userHasPermission = true;
-        }
-        else{
-            this.userHasPermission = false
-        }
-        if (!this.userHasPermission) {
-            this.$router.push('/')
-        }
-        // else{
-        //     if (settingToken) {
-        //         // this.editedItem.server_url = settingToken  
-            this.fetchSiteSettings()
-        //         this.loading = false              
-        //     } else {
-        //         console.log('Invalid setting token.');
-        //         this.$store.dispatch('auth/logout')
-                
-        //     }
-
-        // }
-      } else {
-        console.log('Invalid JWT token.');
-        this.$store.dispatch('auth/logout')
-      }
-    } else {
-      console.log('JWT token not found.');
-      this.$store.dispatch('auth/logout')
-    }
-  },
+    this.editedItem = JSON.parse(settingToken)
+    this.editedItem.drawstarted = JSON.parse(settingToken).drawstarted
+    this.fetchSiteSettings()
+},
   methods:{
     
     handleSnackbarEvent(payload) {
@@ -336,7 +303,7 @@ export default {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                 })
                 // if (response.status == 100) {
@@ -417,7 +384,7 @@ export default {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+                    //'Authorization': `Bearer ${this.token}`
                 },
                 body: formData
             })
@@ -472,7 +439,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify({userId: this.currentUser.userId, updatedData: this.editedItem}),
                 })
@@ -504,7 +471,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify({drawstarted: !this.editedItem.drawstarted}),
                 })
@@ -536,7 +503,7 @@ export default {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                 })
                 if (!response.ok) {

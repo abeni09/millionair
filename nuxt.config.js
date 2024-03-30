@@ -1,6 +1,9 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
+  router: {
+    middleware: 'auth'
+  },
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: '%s - millionair',
@@ -22,6 +25,8 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    '~/plugins/fetch',
+    // '~/plugins/auth.js',
     { src: '~/plugins/cookies', mode: 'client' } // Ensure it runs only on the client side
   ],
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -35,6 +40,7 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
+    'cookie-universal-nuxt',
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
     [

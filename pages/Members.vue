@@ -317,7 +317,8 @@ export default {
     // },
     async mounted() {
         
-    this.token = localStorage.getItem('token');
+    this.token = this.$cookies.get('token');
+    // this.token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
     // const pots = localStorage.getItem('pots');
     if (this.token) {
@@ -562,7 +563,7 @@ export default {
                 const response = await fetch(`${this.server_url}/searchMembers/${column}/${keyword}`, {
                     
                     headers: {
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                 // const response = await fetch(`http://localhost:3006/searchMembers/${column}/${keyword}`, {
                     method: 'GET',
@@ -806,7 +807,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify(
                         {
@@ -840,7 +841,7 @@ export default {
                 const response = await fetch(`${this.server_url}/fetchMembers`, {
                 // const response = await fetch(`http://localhost:3006/fetchMembers`, {
                     headers: {
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                     method: 'GET',
                 })
@@ -871,7 +872,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        //'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify({userData : userData, edit: this.editUserMode, memberId: this.newUser.id})
                 })
@@ -960,7 +961,7 @@ export default {
                     const response = await fetch(`${this.server_url}/deleteMember/${this.UserToDelete.id}`, {
                         method: 'DELETE',
                         headers: {
-                            'Authorization': `Bearer ${this.token}`
+                            //'Authorization': `Bearer ${this.token}`
                         },
                     });
 
