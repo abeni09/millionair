@@ -91,6 +91,8 @@
     name: 'DefaultLayout',
     data() {
       return {
+        snackbar:false,
+        snackBarText:'',
         token: null,
         primarycolor: '#183D0E',
         secondarycolor: '#FFC72C',
@@ -155,6 +157,10 @@
         this.loading = false;
       },
       
+      setSnackbarMessage(_value){
+          this.snackbar = true;
+          this.snackBarText = _value
+      },
       logout() {
         // Remove the JWT token from cookies
         // this.$cookies.remove('token');

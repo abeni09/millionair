@@ -270,6 +270,7 @@ export default {
         getImageUrl() {
             // Construct the image URL using 'editedItem.server_url' and 'editedItem.image_url'
             return `${this.editedItem.server_url}/uploads/Logo/${this.editedItem.image_url}`;
+            // return `http://localhost:3006/uploads/Logo/${this.editedItem.image_url}`;
         }
     },
   components: {
@@ -381,6 +382,7 @@ export default {
             const formData = new FormData();
             formData.append('image', file); // 'file' is the selected image file
             await fetch(`${this.editedItem.server_url}/upload`, {
+            // await fetch(`http://localhost:3006/upload`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

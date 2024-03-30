@@ -214,6 +214,8 @@ export default {
   name: 'IndexPage',
   data(){
     return{
+      snackbar: false,
+      snackBarText:'',
       q0: 0,
       q1: 0,
       q2: 0,
@@ -279,6 +281,10 @@ export default {
   },
   
   methods:{
+    setSnackbarMessage(_value){
+        this.snackbar = true;
+        this.snackBarText = _value
+    },
 
     async fetchMembers(){
             this.loading = true;
