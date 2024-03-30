@@ -171,6 +171,8 @@ export default {
   mounted() {
     
     // this.token = localStorage.getItem('token');
+    this.currentUser = this.$store.state.auth.user
+    console.log(this.currentUser);
     const settingToken = localStorage.getItem('settings');
     this.siteSettingsValues = JSON.parse(settingToken)
     if (this.siteSettingsValues.server_url) {

@@ -284,6 +284,8 @@ export default {
   mounted(){
     // this.token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
+    this.currentUser = this.$store.state.auth.user
+    // console.log(this.currentUser);
     this.editedItem = JSON.parse(settingToken)
     this.editedItem.drawstarted = JSON.parse(settingToken).drawstarted
     this.fetchSiteSettings()
@@ -435,6 +437,8 @@ export default {
             // this.editedItem.updated_at = Date.now();
             this.editedItem.updated_at = 'NOW()';
             // this.editedItem.drawstarted = false;
+            console.log(this.editedItem);
+            console.log(this.currentUser.id);
             try {
                 const response = await fetch(`${this.editedItem.server_url}/updateSiteSettings`, {
                 // const response = await fetch(`http://localhost:3006/updateSiteSettings`, {
@@ -447,7 +451,7 @@ export default {
                 })
                 if (!response.ok) {
                         const finalResponse = await response.json()
-                        console.log(finalResponse);
+                        // console.log(finalResponse);
                         throw new Error(finalResponse.message);
                 }
 
@@ -532,6 +536,7 @@ export default {
  data: () => ({
     token: null,
     userHasPermission: false,
+    currentUser: null,
     // server_url: null,
     snackBarText:'',
     timeout: 2000,
