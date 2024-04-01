@@ -197,9 +197,9 @@
                   dense
               type='number'
               :disabled="loading==true"
-              ref="maxmimum_members"
+              ref="maximum_members"
               
-              v-model="editedItem.maxmimum_members"
+              v-model="editedItem.maximum_members"
               required
               label="Maxmimu Members Per Batch"/>
           <v-text-field
@@ -574,7 +574,7 @@ export default {
      settings: [],
 
     editedItem: {
-        maxmimum_members: null,
+        maximum_members: null,
         systemstartedat: null,
         drawstarted: false,
         drawendedat: null,
