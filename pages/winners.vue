@@ -149,10 +149,13 @@
             search: "",
             filteredUser: [], // Filtered User based on search
             headers: [
-                { text: 'Draw ID', value: 'draw_id' },
+                { text: 'Batch', value: 'batch_number' },
+                { text: 'Winner', value: 'name' },
+                { text: 'Phone', value: 'phone' },
                 { text: 'Lotto Number', value: 'lotto_number' },
-                { text: 'Won Amount', value: 'won_amount' },
-                { text: '', value: 'actions', sortable: false },
+                { text: 'Won Amount', value: 'winamount' },
+                { text: 'Won At', value: 'win_at' },
+                // { text: '', value: 'actions', sortable: false },
             ],
             addDialog: false,
         };
@@ -182,8 +185,8 @@
       async fetchWinners(){
               this.loading = true;
               try {
-                  // const response = await fetch(`http://localhost:3006/fetchWinners`, {
-                  const response = await fetch(`${this.server_url}/fetchWinners`, {
+                  const response = await fetch(`http://localhost:3006/fetchWinners`, {
+                //   const response = await fetch(`${this.server_url}/fetchWinners`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -199,7 +202,7 @@
   
                   const data = await response.json();
                   // console.log(data.users);
-                  this.User = data.users;
+                  this.User = data.winners;
   
                   this.filteredUser = this.User;
                   this.setSnackbarMessage(data.message)
@@ -207,7 +210,7 @@
                   
                   
               } catch (error) {
-                  console.error('Error fetching users:', error);
+                  console.error('Error fetching winners:', error);
                   this.setSnackbarMessage(error)
                   // return false
                   
