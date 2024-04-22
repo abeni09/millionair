@@ -185,8 +185,8 @@
       async fetchWinners(){
               this.loading = true;
               try {
-                  const response = await fetch(`http://localhost:3006/fetchWinners`, {
-                //   const response = await fetch(`${this.server_url}/fetchWinners`, {
+                //   const response = await fetch(`http://localhost:3006/fetchWinners`, {
+                  const response = await fetch(`${this.server_url}/fetchWinners`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
