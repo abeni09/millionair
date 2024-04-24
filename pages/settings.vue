@@ -282,7 +282,7 @@ export default {
 //     }
 //   },
   mounted(){
-    // this.token = localStorage.getItem('token');
+    this.token = localStorage.getItem('token');
     const settingToken = localStorage.getItem('settings');
     this.currentUser = this.$store.state.auth.user
     // console.log(this.currentUser);
@@ -306,7 +306,7 @@ export default {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        //'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${this.token}`
                     },
                 })
                 // if (response.status == 100) {
@@ -388,7 +388,7 @@ export default {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    //'Authorization': `Bearer ${this.token}`
+                    'Authorization': `Bearer ${this.token}`
                 },
                 body: formData
             })
@@ -445,7 +445,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        //'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify({userId: this.currentUser.userId, updatedData: this.editedItem}),
                 })
@@ -477,7 +477,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        //'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify({drawstarted: !this.editedItem.drawstarted}),
                 })
@@ -509,7 +509,7 @@ export default {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        //'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${this.token}`
                     },
                 })
                 if (!response.ok) {
