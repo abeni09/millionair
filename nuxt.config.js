@@ -27,7 +27,7 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    // '~/plugins/fetch',
+    '~/plugins/fetch',
     // '~/plugins/auth.js',
     { src: '~/plugins/cookies', mode: 'client' } // Ensure it runs only on the client side
   ],

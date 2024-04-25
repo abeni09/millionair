@@ -300,7 +300,7 @@ export default {
     async fetchSiteSettings(){
             this.loading = true;
             try {
-                // const response = await fetch(`http://78.46.175.135:3006/fetchSiteSettings`, {
+                // const response = await fetch(`http://localhost:3006/fetchSiteSettings`, {
                 const response = await fetch(`${this.editedItem.server_url}/fetchSiteSettings`, {
                 // const response = await fetch(`${this.siteSettingsValues.server_url}/generate-users`, {
                     method: 'GET',
