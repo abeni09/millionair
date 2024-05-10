@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-app v-if="currentUser" dark>
+    <v-app v-if="currentUser && !drawStarted" dark>
       
       <!-- <v-overlay v-if="loading">
         <v-progress-circular
@@ -67,8 +67,11 @@
         <span>&copy; {{ new Date().getFullYear() +' '+ footerText}}</span>
       </v-footer>
     </v-app>
-    <v-app v-else>
+    <v-app v-else-if="!currentUser">
       <login/>
+    </v-app>
+    <v-app v-else-if= "drawStarted">
+      <DrawProcess/>
     </v-app>
   </div>
   </template>
@@ -78,6 +81,9 @@
   import login from '../components/login.vue'
   import axios from 'axios';
   import jwt from 'jsonwebtoken';
+  import DrawProcess from '../components/drawProcess.vue';
+  import firebase from 'firebase/compat/app';
+  import 'firebase/compat/database';
   
   export default {
     head() {
@@ -91,6 +97,7 @@
     name: 'DefaultLayout',
     data() {
       return {
+        drawStarted: false,
         snackbar:false,
         snackBarText:'',
         token: null,
@@ -121,39 +128,62 @@
       
       async fetchSiteSettings(){
         this.loading = true;
-        try {
-            const response = await fetch(`http://78.46.175.135:3006/fetchSiteSettings`, {
-            // const response = await fetch(`${this.siteSettingsValues.server_url}/generate-users`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    //'Authorization': `Bearer ${this.token}`
-                },
-            })
-            // if (response.status == 100) {
-                
+        const database = firebase.database();
+        const settingRef = database.ref('Settings');
+        
+        settingRef
+        .on('value', snapshot => {
+          if (snapshot.exists()) {
+            console.log(snapshot.val());
+            this.drawStarted = snapshot.val().drawstarted
+            // this.drawStarted = true
+            // this.drawStarted = snapshot.val().drawstarted
+            localStorage.setItem('serverURL', snapshot.val().server_url)
+            localStorage.setItem('pots', snapshot.val().batch_amount)
+            localStorage.setItem('settings', JSON.stringify(snapshot.val()))
+            // console.log(snapshot.val());
+            // for (let i = 0; i < 10; i++) {
+            //   this.items.push({tab:`Batch ${i + 1}`})
             // }
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            // this.activeTab = this.items[0].tab;
+          }
+          else{
+            console.log("No data found");
+          }
+        });
+        // try {
+        //     const response = await fetch(`http://78.46.175.135:3006/fetchSiteSettings`, {
+        //     // const response = await fetch(`${this.siteSettingsValues.server_url}/generate-users`, {
+        //         method: 'GET',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             //'Authorization': `Bearer ${this.token}`
+        //         },
+        //     })
+        //     // if (response.status == 100) {
+                
+        //     // }
+        //     if (!response.ok) {
+        //         throw new Error(`HTTP error! Status: ${response.status}`);
+        //     }
 
-            const data = await response.json();
-            console.log(data);
-            if (data.settings != null) {
-              localStorage.setItem('serverURL', data.settings.server_url)
-              localStorage.setItem('pots', data.settings.batch_amount)
-              localStorage.setItem('settings', JSON.stringify(data.settings))
-              // this.$router.go()
-              // console.log(localStorage.getItem('pots'));
-              // console.log(JSON.parse(localStorage.getItem('settings')).batch_amount);
-            }
+        //     const data = await response.json();
+        //     console.log(data);
+        //     if (data.settings != null) {
+        //       localStorage.setItem('serverURL', data.settings.server_url)
+        //       localStorage.setItem('pots', data.settings.batch_amount)
+        //       localStorage.setItem('settings', JSON.stringify(data.settings))
+        //       // this.$router.go()
+        //       // console.log(localStorage.getItem('pots'));
+        //       // console.log(JSON.parse(localStorage.getItem('settings')).batch_amount);
+        //     }
             
-        } catch (error) {
-            console.error('Error fetching site settings:', error);
-            this.setSnackbarMessage(error)
-            // return false
+        // } catch (error) {
+        //     console.error('Error fetching site settings:', error);
+        //     this.setSnackbarMessage(error)
+        //     // return false
             
-        }
+        // }
         this.loading = false;
       },
       

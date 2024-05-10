@@ -48,15 +48,15 @@ export default {
     [
       '@nuxtjs/firebase',
       {
-        config: {
-          apiKey: "AIzaSyBILi-glnTmpwQaevsWo4UcladEYm35uqU",
-          authDomain: "equb-eb08a.firebaseapp.com",
-          projectId: "equb-eb08a",
-          storageBucket: "equb-eb08a.appspot.com",
-          messagingSenderId: "713993264198",
-          appId: "1:713993264198:web:00a0f07b12db38ec3d7e47",
-          measurementId: "G-3WH52P2475",
-          databaseURL: "https://equb-eb08a-default-rtdb.firebaseio.com/"
+        config: {  
+          apiKey: "AIzaSyDDo95yjerRulTQZS4dQUPaUIK2s7JJuLs",
+          authDomain: "derash-567f2.firebaseapp.com",
+          databaseURL: "https://derash-567f2-default-rtdb.firebaseio.com",
+          projectId: "derash-567f2",
+          storageBucket: "derash-567f2.appspot.com",
+          messagingSenderId: "605778098431",
+          appId: "1:605778098431:web:c2d0c365cb451b968bb4ca",
+          measurementId: "G-5QJ98BNQVR",
         },
         services: {
           auth: true,
