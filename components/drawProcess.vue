@@ -16,13 +16,10 @@
         </v-btn>
       </template>
     </v-snackbar>
-    <template>
-      <div class="container">
-        <div class="content">
-          <p>Draw stopping in: {{ formattedTime }}</p>
-        </div>
-      </div>
-    </template>
+    <VBtn class="my-2 gradient" style=" color: #000; font-size: x-large;"
+               block min-height="60">
+               {{ formattedTime }}
+                </VBtn>
     <v-progress-circular class="my-2" v-if="stopping" style="width: 100%; margin: auto; color: #183D0E; " align = "center" indeterminate/>
                            
     <VBtn v-else class="my-2 gradient" style="background-color: #183D0E; color: #FFC72C;"
@@ -37,10 +34,9 @@
 
     <vTabs-items v-model="activeTab">
       <v-tab-item v-for="(tab, index) in tabs" :key="index">
-        <v-card flat>
-            <v-list v-if="tab.contents.length > 0">
-              
-              <v-list-item v-for="(item, idx) in tab.contents" :key="idx">
+          <v-list v-if="tab.contents.length > 0">
+            <v-card flat v-for="(item, idx) in tab.contents" :key="idx">
+              <v-list-item>
                 <v-list-item-icon>
                   <v-icon v-if="item.used" color = "green" size="30" style="align-self: center;">mdi-check</v-icon>
                   <v-icon v-else-if="!item.expired && !item.used" color = "yellow" size="30" style="align-self: center;">mdi-help</v-icon>
@@ -75,15 +71,16 @@
                 <v-list-item-subtitle>{{ getMemberFromList(item.drawn_by)[0] }}</v-list-item-subtitle>
                 <v-list-item-subtitle>{{ getMemberFromList(item.drawn_by)[1] }}</v-list-item-subtitle>
                 <v-list-item-subtitle>{{ getMemberFromList(item.drawn_by)[2] }}</v-list-item-subtitle>
-                <v-list-item-subtitle>{{ getMemberFromList(item.drawn_by)[3] }}</v-list-item-subtitle>
-                <v-list-item-subtitle>{{ getMemberFromList(item.drawn_by)[4] }}</v-list-item-subtitle>
-                <v-list-item-subtitle>{{ getMemberFromList(item.drawn_by)[5] }}</v-list-item-subtitle>
-                <v-list-item-title>{{ item.used }}</v-list-item-title>
+                <v-list-item-subtitle>
+                  {{ 'Woreda '+ getMemberFromList(item.drawn_by)[5] + ', ' + getMemberFromList(item.drawn_by)[4] + ', ' + getMemberFromList(item.drawn_by)[3] }}
+                </v-list-item-subtitle>
+                <!-- <v-list-item-subtitle>{{ getMemberFromList(item.drawn_by)[4] }}</v-list-item-subtitle> -->
+                <!-- <v-list-item-subtitle>{{ getMemberFromList(item.drawn_by)[5] }}</v-list-item-subtitle> -->
+                <!-- <v-list-item-title>{{ item.used }}</v-list-item-title> -->
                 <v-list-item-title>{{ item.timer }}</v-list-item-title>
               </v-list-item>
-            </v-list>
-        </v-card>
-        
+            </v-card>
+          </v-list>
       </v-tab-item>
     </vTabs-items>
   </v-card>
