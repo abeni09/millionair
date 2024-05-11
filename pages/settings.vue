@@ -472,8 +472,8 @@ export default {
         async startDraw() {
             this.starping = true
             try {
-                // const response = await fetch(`${this.editedItem.server_url}/startDraw`, {
-                const response = await fetch(`http://localhost:3006/startDraw`, {
+                const response = await fetch(`${this.editedItem.server_url}/startDraw`, {
+                // const response = await fetch(`http://localhost:3006/startDraw`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
